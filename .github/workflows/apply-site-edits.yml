@@ -27,108 +27,108 @@ jobs:
           s=s.replace("Pas de paiement en ligne ici : faites simplement une promesse de don et laissez-lui un petit mot pour son anniversaire.<br>Vous pourrez ensuite <b>lui remettre directement votre participation</b>. ❤️","Pas de paiement en ligne ici : faites simplement une promesse de don et laissez-lui un petit mot pour son anniversaire.<br>Vous pourrez ensuite <b>lui remettre directement votre participation quand les détails du voyage seront définitifs</b>. ❤️")
 
           css='''
-.leaflet-container{font-family:Inter,system-ui,sans-serif;background:#07131d}
-.travel-map-section{margin:24px 0 34px;background:#0d222e;border:1px solid var(--line);border-radius:28px;padding:18px;box-shadow:0 16px 40px #0003}
-.travel-map-head{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:14px}
-.travel-map-kicker{font-weight:900;font-size:19px;letter-spacing:.04em}
-.travel-map-head p{margin:5px 0 0;color:var(--muted);font-size:14px}
-.travel-filters{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.travel-filter{border:1px solid var(--line);border-radius:11px;padding:9px 12px;background:#102c3a;color:var(--text);font-weight:800;cursor:pointer}
-.travel-filter.active{background:#173f51;border-color:var(--accent);box-shadow:0 0 0 1px #77d4ff22 inset}
-.travel-map-grid{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(270px,.72fr);gap:12px}
-#travel-map{height:620px;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#07131d}
-.travel-itinerary{background:#081923;border:1px solid var(--line);border-radius:18px;padding:16px;max-height:620px;overflow:auto}
-.travel-itinerary h3{margin:0 0 12px;font-size:18px}
-.travel-step{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #294452}
-.travel-step:last-child{border-bottom:0}
-.travel-step>span{font-size:20px;width:28px;text-align:center}
-.travel-step b{font-size:13px}
-.travel-step small{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.35}
-.travel-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
-.travel-summary>div{background:#0a1d29;border:1px solid var(--line);border-radius:15px;padding:13px}
-.travel-summary strong{display:block;font-size:14px}
-.travel-summary span{display:block;color:var(--muted);font-size:11px;margin-top:5px;line-height:1.35}
-.travel-pin{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:2px solid #fff;box-shadow:0 4px 14px #0007;font-size:17px}
-.travel-pin.flight{background:#239bd2}.travel-pin.boat{background:#d74352}.travel-pin.hotel{background:#43b56b}.travel-pin.bus{background:#e5b52d}.travel-pin.cruise{background:#a96bd4}
-.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#102532;color:#f4f8fa;border:1px solid #294452}
-.leaflet-popup-content{margin:13px 15px;line-height:1.45}
-.leaflet-popup-content b{font-size:15px}.leaflet-popup-content small{color:#abc0ca}
-@media(max-width:850px){.travel-map-head{align-items:flex-start;flex-direction:column}.travel-filters{justify-content:flex-start}.travel-map-grid{grid-template-columns:1fr}#travel-map{height:500px}.travel-itinerary{max-height:none}.travel-summary{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:520px){#travel-map{height:430px}.travel-summary{grid-template-columns:1fr}.travel-map-section{padding:12px;border-radius:20px}}
-'''
+          .leaflet-container{font-family:Inter,system-ui,sans-serif;background:#07131d}
+          .travel-map-section{margin:24px 0 34px;background:#0d222e;border:1px solid var(--line);border-radius:28px;padding:18px;box-shadow:0 16px 40px #0003}
+          .travel-map-head{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:14px}
+          .travel-map-kicker{font-weight:900;font-size:19px;letter-spacing:.04em}
+          .travel-map-head p{margin:5px 0 0;color:var(--muted);font-size:14px}
+          .travel-filters{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+          .travel-filter{border:1px solid var(--line);border-radius:11px;padding:9px 12px;background:#102c3a;color:var(--text);font-weight:800;cursor:pointer}
+          .travel-filter.active{background:#173f51;border-color:var(--accent);box-shadow:0 0 0 1px #77d4ff22 inset}
+          .travel-map-grid{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(270px,.72fr);gap:12px}
+          #travel-map{height:620px;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#07131d}
+          .travel-itinerary{background:#081923;border:1px solid var(--line);border-radius:18px;padding:16px;max-height:620px;overflow:auto}
+          .travel-itinerary h3{margin:0 0 12px;font-size:18px}
+          .travel-step{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #294452}
+          .travel-step:last-child{border-bottom:0}
+          .travel-step>span{font-size:20px;width:28px;text-align:center}
+          .travel-step b{font-size:13px}
+          .travel-step small{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.35}
+          .travel-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+          .travel-summary>div{background:#0a1d29;border:1px solid var(--line);border-radius:15px;padding:13px}
+          .travel-summary strong{display:block;font-size:14px}
+          .travel-summary span{display:block;color:var(--muted);font-size:11px;margin-top:5px;line-height:1.35}
+          .travel-pin{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:2px solid #fff;box-shadow:0 4px 14px #0007;font-size:17px}
+          .travel-pin.flight{background:#239bd2}.travel-pin.boat{background:#d74352}.travel-pin.hotel{background:#43b56b}.travel-pin.bus{background:#e5b52d}.travel-pin.cruise{background:#a96bd4}
+          .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#102532;color:#f4f8fa;border:1px solid #294452}
+          .leaflet-popup-content{margin:13px 15px;line-height:1.45}
+          .leaflet-popup-content b{font-size:15px}.leaflet-popup-content small{color:#abc0ca}
+          @media(max-width:850px){.travel-map-head{align-items:flex-start;flex-direction:column}.travel-filters{justify-content:flex-start}.travel-map-grid{grid-template-columns:1fr}#travel-map{height:500px}.travel-itinerary{max-height:none}.travel-summary{grid-template-columns:repeat(2,1fr)}}
+          @media(max-width:520px){#travel-map{height:430px}.travel-summary{grid-template-columns:1fr}.travel-map-section{padding:12px;border-radius:20px}}
+          '''
           if 'travel-map-section' not in s:
               s=s.replace('</style>',css+'</style>',1)
 
           map_html='''
-<div id="travel-map-section" class="travel-map-section">
-  <div class="travel-map-head">
-    <div><div class="travel-map-kicker">📍 NOTRE ITINÉRAIRE</div><p>Cliquez sur les points pour découvrir les détails du voyage.</p></div>
-    <div class="travel-filters" role="group" aria-label="Filtres de la carte">
-      <button type="button" class="travel-filter active" data-layer="flights">✈️ Vols ✓</button>
-      <button type="button" class="travel-filter active" data-layer="boats">⛴️ Bateaux ✓</button>
-      <button type="button" class="travel-filter active" data-layer="hotels">🏨 Hôtels ✓</button>
-      <button type="button" class="travel-filter active" data-layer="buses">🚌 Bus ✓</button>
-    </div>
-  </div>
-  <div class="travel-map-grid">
-    <div id="travel-map" aria-label="Carte interactive du voyage"></div>
-    <aside class="travel-itinerary">
-      <h3>Les étapes du voyage</h3>
-      <div class="travel-step"><span>✈️</span><div><b>7 jan.</b> — Paris → Tromsø<small>Vol direct · 09:10 → 13:05</small></div></div>
-      <div class="travel-step"><span>🏨</span><div><b>7–9 jan.</b> — Tromsø<small>SmartHotel Tromsø</small></div></div>
-      <div class="travel-step"><span>🐋</span><div><b>9–10 jan.</b> — MV Quest<small>Croisière baleines + aurores</small></div></div>
-      <div class="travel-step"><span>✈️</span><div><b>11 jan.</b> — Tromsø → Bodø<small>Vol direct · 11:40 → 12:40</small></div></div>
-      <div class="travel-step"><span>⛴️</span><div><b>11 jan.</b> — Bodø → Moskenes<small>Ferry · 16:00 → 20:00</small></div></div>
-      <div class="travel-step"><span>🏨</span><div><b>11–13 jan.</b> — Sakrisøy<small>2 nuits · King Room</small></div></div>
-      <div class="travel-step"><span>🏨</span><div><b>13–14 jan.</b> — Å<small>Cabin 1 · 1 nuit</small></div></div>
-      <div class="travel-step"><span>🚌</span><div><b>14 jan.</b> — Å → Moskenes<small>Bus · 06:25 → 06:35</small></div></div>
-      <div class="travel-step"><span>⛴️</span><div><b>14 jan.</b> — Moskenes → Bodø<small>Ferry · 08:00 → 11:15</small></div></div>
-      <div class="travel-step"><span>✈️</span><div><b>14 jan.</b> — Bodø → Oslo<small>Vol direct · 17:50 → 19:20</small></div></div>
-      <div class="travel-step"><span>🏨</span><div><b>14–17 jan.</b> — Oslo<small>Appartement</small></div></div>
-      <div class="travel-step"><span>✈️</span><div><b>17 jan.</b> — Oslo → Paris<small>Vol direct · 09:00 → 11:25</small></div></div>
-    </aside>
-  </div>
-  <div class="travel-summary">
-    <div><strong>✈️ 4 vols</strong><span>Paris → Tromsø → Bodø → Oslo → Paris</span></div>
-    <div><strong>⛴️ 2 traversées</strong><span>Bodø ↔ Moskenes</span></div>
-    <div><strong>🏨 5 hébergements</strong><span>2 à Tromsø · Sakrisøy · Å · Oslo</span></div>
-    <div><strong>🚌 Lofoten</strong><span>Å · Moskenes · Sakrisøy · Reine · Hamnøy</span></div>
-  </div>
-</div>
-'''
+          <div id="travel-map-section" class="travel-map-section">
+            <div class="travel-map-head">
+              <div><div class="travel-map-kicker">📍 NOTRE ITINÉRAIRE</div><p>Cliquez sur les points pour découvrir les détails du voyage.</p></div>
+              <div class="travel-filters" role="group" aria-label="Filtres de la carte">
+                <button type="button" class="travel-filter active" data-layer="flights">✈️ Vols ✓</button>
+                <button type="button" class="travel-filter active" data-layer="boats">⛴️ Bateaux ✓</button>
+                <button type="button" class="travel-filter active" data-layer="hotels">🏨 Hôtels ✓</button>
+                <button type="button" class="travel-filter active" data-layer="buses">🚌 Bus ✓</button>
+              </div>
+            </div>
+            <div class="travel-map-grid">
+              <div id="travel-map" aria-label="Carte interactive du voyage"></div>
+              <aside class="travel-itinerary">
+                <h3>Les étapes du voyage</h3>
+                <div class="travel-step"><span>✈️</span><div><b>7 jan.</b> — Paris → Tromsø<small>Vol direct · 09:10 → 13:05</small></div></div>
+                <div class="travel-step"><span>🏨</span><div><b>7–9 jan.</b> — Tromsø<small>SmartHotel Tromsø</small></div></div>
+                <div class="travel-step"><span>🐋</span><div><b>9–10 jan.</b> — MV Quest<small>Croisière baleines + aurores</small></div></div>
+                <div class="travel-step"><span>✈️</span><div><b>11 jan.</b> — Tromsø → Bodø<small>Vol direct · 11:40 → 12:40</small></div></div>
+                <div class="travel-step"><span>⛴️</span><div><b>11 jan.</b> — Bodø → Moskenes<small>Ferry · 16:00 → 20:00</small></div></div>
+                <div class="travel-step"><span>🏨</span><div><b>11–13 jan.</b> — Sakrisøy<small>2 nuits · King Room</small></div></div>
+                <div class="travel-step"><span>🏨</span><div><b>13–14 jan.</b> — Å<small>Cabin 1 · 1 nuit</small></div></div>
+                <div class="travel-step"><span>🚌</span><div><b>14 jan.</b> — Å → Moskenes<small>Bus · 06:25 → 06:35</small></div></div>
+                <div class="travel-step"><span>⛴️</span><div><b>14 jan.</b> — Moskenes → Bodø<small>Ferry · 08:00 → 11:15</small></div></div>
+                <div class="travel-step"><span>✈️</span><div><b>14 jan.</b> — Bodø → Oslo<small>Vol direct · 17:50 → 19:20</small></div></div>
+                <div class="travel-step"><span>🏨</span><div><b>14–17 jan.</b> — Oslo<small>Appartement</small></div></div>
+                <div class="travel-step"><span>✈️</span><div><b>17 jan.</b> — Oslo → Paris<small>Vol direct · 09:00 → 11:25</small></div></div>
+              </aside>
+            </div>
+            <div class="travel-summary">
+              <div><strong>✈️ 4 vols</strong><span>Paris → Tromsø → Bodø → Oslo → Paris</span></div>
+              <div><strong>⛴️ 2 traversées</strong><span>Bodø ↔ Moskenes</span></div>
+              <div><strong>🏨 5 hébergements</strong><span>2 à Tromsø · Sakrisøy · Å · Oslo</span></div>
+              <div><strong>🚌 Lofoten</strong><span>Å · Moskenes · Sakrisøy · Reine · Hamnøy</span></div>
+            </div>
+          </div>
+          '''
           if 'id="travel-map"' not in s:
               s=s.replace('<section><h2 class="sectiontitle">🗓️ Le programme</h2>','<section id="programme"><h2 class="sectiontitle">🗓️ Le programme</h2>'+map_html,1)
 
           scripts='''
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-<script>
-(function(){
-  function initTravelMap(){
-    const el=document.getElementById('travel-map');
-    if(!el || typeof L==='undefined') return;
-    const map=L.map(el,{scrollWheelZoom:false,zoomControl:true}).setView([66.1,16.5],5);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
-    const groups={flights:L.layerGroup().addTo(map),boats:L.layerGroup().addTo(map),hotels:L.layerGroup().addTo(map),buses:L.layerGroup().addTo(map)};
-    const allPoints=[];
-    const c={paris:[48.8566,2.3522],tromso:[69.6492,18.9553],bodo:[67.2804,14.4049],moskenes:[67.8989,13.0460],sakrisoy:[67.8970,13.0095],reine:[67.9325,13.0896],hamnoy:[67.9453,13.2837],aa:[67.8797,12.9822],oslo:[59.9139,10.7522],cruise:[69.72,18.55]};
-    function pin(type,e){return L.divIcon({className:'',html:'<div class="travel-pin '+type+'">'+e+'</div>',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-17]})}
-    function marker(group,key,title,html,type,e){const m=L.marker(c[key],{icon:pin(type,e)}).bindPopup('<b>'+title+'</b><br><small>'+html+'</small>');m.addTo(groups[group]);allPoints.push(c[key]);}
-    function line(group,pts,opts){L.polyline(pts,opts).addTo(groups[group]);pts.forEach(p=>allPoints.push(p));}
-    marker('flights','paris','✈️ Paris','7 jan. · départ 09:10','flight','✈️'); marker('flights','tromso','✈️ Tromsø','7 jan. · arrivée 13:05 · puis vol vers Bodø le 11 jan.','flight','✈️'); marker('flights','bodo','✈️ Bodø','11 jan. · arrivée depuis Tromsø · départ vers Oslo le 14 jan.','flight','✈️'); marker('flights','oslo','✈️ Oslo','14 jan. · arrivée 19:20 · retour Paris le 17 jan.','flight','✈️');
-    line('flights',[c.paris,c.tromso],{color:'#77d4ff',weight:4,dashArray:'8 8'}); line('flights',[c.tromso,c.bodo],{color:'#77d4ff',weight:4,dashArray:'8 8'}); line('flights',[c.bodo,c.oslo],{color:'#77d4ff',weight:4,dashArray:'8 8'}); line('flights',[c.oslo,c.paris],{color:'#77d4ff',weight:4,dashArray:'8 8'});
-    marker('boats','bodo','⛴️ Bodø → Moskenes','11 jan. · 16:00 → 20:00','boat','⛴️'); marker('boats','moskenes','⛴️ Moskenes','11 jan. arrivée 20:00 · retour le 14 jan. à 08:00','boat','⛴️'); marker('boats','cruise','🐋 MV Quest','9 jan. 19:00 → 10 jan. ~18:00–19:00 · baleines + aurores','cruise','🐋');
-    line('boats',[c.bodo,c.moskenes],{color:'#ff6573',weight:5,dashArray:'10 7'}); line('boats',[c.moskenes,c.bodo],{color:'#ff6573',weight:3,dashArray:'5 8',opacity:.55}); line('boats',[c.tromso,c.cruise,c.tromso],{color:'#c38cff',weight:4,dashArray:'6 8'});
-    marker('hotels','tromso','🏨 SmartHotel Tromsø','7 → 9 jan. · 2 nuits','hotel','🏨'); marker('hotels','tromso','🏨 City Living Tromsø','10 → 11 jan. · 1 nuit · kitchenette','hotel','🏨'); marker('hotels','sakrisoy','🏨 Sakrisøy Gjestegård','11 → 13 jan. · 2 nuits · King Room','hotel','🏨'); marker('hotels','aa','🏨 Cabin 1 · Å','13 → 14 jan. · 1 nuit · kitchenette privée','hotel','🏨'); marker('hotels','oslo','🏨 Oslo','14 → 17 jan. · appartement','hotel','🏨');
-    marker('buses','moskenes','🚌 Moskenes','Correspondance vers Sakrisøy','bus','🚌'); marker('buses','sakrisoy','🚌 Sakrisøy','Point Lofoten','bus','🚌'); marker('buses','reine','🚌 Reine','Étape Lofoten','bus','🚌'); marker('buses','hamnoy','🚌 Hamnøy','Étape Lofoten','bus','🚌'); marker('buses','aa','🚌 Å','14 jan. · départ 06:25','bus','🚌');
-    line('buses',[c.aa,c.moskenes],{color:'#f0c34a',weight:4,dashArray:'5 7'}); line('buses',[c.moskenes,c.sakrisoy,c.reine,c.hamnoy,c.aa],{color:'#f0c34a',weight:3,dashArray:'3 7',opacity:.45});
-    map.fitBounds(L.latLngBounds(allPoints),{padding:[35,35]}); setTimeout(function(){map.invalidateSize()},250);
-    document.querySelectorAll('.travel-filter').forEach(btn=>btn.addEventListener('click',function(){const k=this.dataset.layer,a=this.classList.toggle('active');if(a)groups[k].addTo(map);else map.removeLayer(groups[k]);this.textContent=this.textContent.replace(/✓$/,'')+(a?' ✓':'')}));
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initTravelMap);else initTravelMap();
-})();
-</script>
-'''
+          <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+          <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+          <script>
+          (function(){
+            function initTravelMap(){
+              const el=document.getElementById('travel-map');
+              if(!el || typeof L==='undefined') return;
+              const map=L.map(el,{scrollWheelZoom:false,zoomControl:true}).setView([66.1,16.5],5);
+              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+              const groups={flights:L.layerGroup().addTo(map),boats:L.layerGroup().addTo(map),hotels:L.layerGroup().addTo(map),buses:L.layerGroup().addTo(map)};
+              const allPoints=[];
+              const c={paris:[48.8566,2.3522],tromso:[69.6492,18.9553],bodo:[67.2804,14.4049],moskenes:[67.8989,13.0460],sakrisoy:[67.8970,13.0095],reine:[67.9325,13.0896],hamnoy:[67.9453,13.2837],aa:[67.8797,12.9822],oslo:[59.9139,10.7522],cruise:[69.72,18.55]};
+              function pin(type,e){return L.divIcon({className:'',html:'<div class="travel-pin '+type+'">'+e+'</div>',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-17]})}
+              function marker(group,key,title,html,type,e){const m=L.marker(c[key],{icon:pin(type,e)}).bindPopup('<b>'+title+'</b><br><small>'+html+'</small>');m.addTo(groups[group]);allPoints.push(c[key]);}
+              function line(group,pts,opts){L.polyline(pts,opts).addTo(groups[group]);pts.forEach(p=>allPoints.push(p));}
+              marker('flights','paris','✈️ Paris','7 jan. · départ 09:10','flight','✈️'); marker('flights','tromso','✈️ Tromsø','7 jan. · arrivée 13:05 · puis vol vers Bodø le 11 jan.','flight','✈️'); marker('flights','bodo','✈️ Bodø','11 jan. · arrivée depuis Tromsø · départ vers Oslo le 14 jan.','flight','✈️'); marker('flights','oslo','✈️ Oslo','14 jan. · arrivée 19:20 · retour Paris le 17 jan.','flight','✈️');
+              line('flights',[c.paris,c.tromso],{color:'#77d4ff',weight:4,dashArray:'8 8'}); line('flights',[c.tromso,c.bodo],{color:'#77d4ff',weight:4,dashArray:'8 8'}); line('flights',[c.bodo,c.oslo],{color:'#77d4ff',weight:4,dashArray:'8 8'}); line('flights',[c.oslo,c.paris],{color:'#77d4ff',weight:4,dashArray:'8 8'});
+              marker('boats','bodo','⛴️ Bodø → Moskenes','11 jan. · 16:00 → 20:00','boat','⛴️'); marker('boats','moskenes','⛴️ Moskenes','11 jan. arrivée 20:00 · retour le 14 jan. à 08:00','boat','⛴️'); marker('boats','cruise','🐋 MV Quest','9 jan. 19:00 → 10 jan. ~18:00–19:00 · baleines + aurores','cruise','🐋');
+              line('boats',[c.bodo,c.moskenes],{color:'#ff6573',weight:5,dashArray:'10 7'}); line('boats',[c.moskenes,c.bodo],{color:'#ff6573',weight:3,dashArray:'5 8',opacity:.55}); line('boats',[c.tromso,c.cruise,c.tromso],{color:'#c38cff',weight:4,dashArray:'6 8'});
+              marker('hotels','tromso','🏨 SmartHotel Tromsø','7 → 9 jan. · 2 nuits','hotel','🏨'); marker('hotels','tromso','🏨 City Living Tromsø','10 → 11 jan. · 1 nuit · kitchenette','hotel','🏨'); marker('hotels','sakrisoy','🏨 Sakrisøy Gjestegård','11 → 13 jan. · 2 nuits · King Room','hotel','🏨'); marker('hotels','aa','🏨 Cabin 1 · Å','13 → 14 jan. · 1 nuit · kitchenette privée','hotel','🏨'); marker('hotels','oslo','🏨 Oslo','14 → 17 jan. · appartement','hotel','🏨');
+              marker('buses','moskenes','🚌 Moskenes','Correspondance vers Sakrisøy','bus','🚌'); marker('buses','sakrisoy','🚌 Sakrisøy','Point Lofoten','bus','🚌'); marker('buses','reine','🚌 Reine','Étape Lofoten','bus','🚌'); marker('buses','hamnoy','🚌 Hamnøy','Étape Lofoten','bus','🚌'); marker('buses','aa','🚌 Å','14 jan. · départ 06:25','bus','🚌');
+              line('buses',[c.aa,c.moskenes],{color:'#f0c34a',weight:4,dashArray:'5 7'}); line('buses',[c.moskenes,c.sakrisoy,c.reine,c.hamnoy,c.aa],{color:'#f0c34a',weight:3,dashArray:'3 7',opacity:.45});
+              map.fitBounds(L.latLngBounds(allPoints),{padding:[35,35]}); setTimeout(function(){map.invalidateSize()},250);
+              document.querySelectorAll('.travel-filter').forEach(btn=>btn.addEventListener('click',function(){const k=this.dataset.layer,a=this.classList.toggle('active');if(a)groups[k].addTo(map);else map.removeLayer(groups[k]);this.textContent=this.textContent.replace(/✓$/,'')+(a?' ✓':'')}));
+            }
+            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initTravelMap);else initTravelMap();
+          })();
+          </script>
+          '''
           if 'initTravelMap' not in s and 'id="travel-map"' in s:
               s=s.replace('</body>',scripts+'</body>',1)
           p.write_text(s)
