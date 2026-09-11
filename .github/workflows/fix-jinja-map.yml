@@ -1,0 +1,48 @@
+name: Corrige le template Jinja de la carte
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  fix-template:
+    if: github.event.head_commit.message != 'Corrige le template Jinja de la carte'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Corrige le sélecteur CSS conflictuel avec Jinja
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('templates/index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '@media(max-width:520px){#travel-map{height:390px}'
+          new = '@media(max-width:520px){\n#travel-map{height:390px}'
+          if old not in s:
+              raise SystemExit('Motif CSS attendu introuvable')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          PY
+          python - <<'PY'
+          from pathlib import Path
+          s = Path('templates/index.html').read_text(encoding='utf-8')
+          if '{#travel-map' in s:
+              raise SystemExit('Un motif Jinja {#travel-map subsiste')
+          print('Template corrigé : aucun {#travel-map détecté')
+          PY
+      - name: Commit et suppression du workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add templates/index.html
+          git commit -m 'Corrige le template Jinja de la carte'
+          git rm .github/workflows/fix-jinja-map.yml
+          git commit -m 'Supprime le workflow temporaire de correction'
+          git push
