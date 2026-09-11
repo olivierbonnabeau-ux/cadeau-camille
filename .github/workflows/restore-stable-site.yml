@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Restore known-good template
         run: |
           git show 38ffeee003f23f349d6eeb0e73d445e0edb899ef:templates/index.html > templates/index.html
