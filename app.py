@@ -34,11 +34,10 @@ class Pledge(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     activity = db.relationship('Activity', backref='pledges')
 
-# The public collection represents Camille's share of the trip (≈ 2,400 €).
-# Targets below are therefore based on half of the estimated 2-person budget.
 ACTIVITIES = [
     ('✈️', 'Avion', 'Les vols de l’aventure : Paris → Tromsø → Bodø → Oslo → Paris.', 256),
     ('🌌', 'Tromsø', 'Trois nuits à Tromsø pour découvrir la ville, le port, les cafés et profiter des possibilités d’aurores.', 380),
+    ('🐋', 'Croisière Aurore Boréale et Safari Baleine', '24 h en mer : safari baleine, recherche d’aurores, cabine double, dîner, petit-déjeuner et déjeuner inclus. Reste offert par Olivier.', 1215),
     ('🏔️', 'Les îles Lofoten', 'Découvrez Sakrisøy, Reine, Hamnøy, les fjords et les montagnes qui plongent dans la mer.', 192.50),
     ('🛖', "S'endormir sous les aurores boréales dans des cabanes au bout du monde", 'Cabin 1 à Å : studio 23 m², cuisine privée, salle de bain, entrée privée, patio et vue mer + montagne.', 173.50),
     ('⛴️', 'Traversée Bodø → Moskenes', 'Traversée piétonne Bodø → Moskenes. Budget prévu : 0 € ; réservation de siège facultative à 65 NOK par personne.', 0),
@@ -46,26 +45,15 @@ ACTIVITIES = [
     ('🍽️', 'Repas & gourmandises', 'Des spécialités norvégiennes végétariennes, des repas chauds, des gaufres au brunost, des brioches à la cannelle et quelques gourmandises locales.', 330),
 ]
 
-# Images uploaded/selected for this draft. They are stored locally so the draft is self-contained.
 IMAGE_MAP = {
     'Avion': ['/static/images/avion.png'],
     'Tromsø': ['/static/images/tromso.png'],
-    'Croisière Aurore Boréale et Safari Baleine': [
-        '/static/images/quest.png', '/static/images/orca.png', '/static/images/aurora.png'
-    ],
+    'Croisière Aurore Boréale et Safari Baleine': ['/static/images/quest.png', '/static/images/orca.png', '/static/images/aurora.png'],
     'Les îles Lofoten': ['/static/images/lofoten.png'],
     "S'endormir sous les aurores boréales dans des cabanes au bout du monde": ['/static/images/cabin.png'],
     'Traversée Bodø → Moskenes': ['/static/images/ferry.png'],
-    'Oslo': [
-        '/static/images/oslo_palace.png',
-        '/static/images/oslo_port.png',
-        'https://imageio.forbes.com/specials-images/imageserve/67780d31ab136252656d799b/0x0.jpg?fit=bounds&format=jpg&height=900&width=1600'
-    ],
-    'Repas & gourmandises': [
-        '/static/images/waffles.png', '/static/images/kanelboller.png', '/static/images/lefse.png',
-        '/static/images/rommegrot.png', '/static/images/lefse_savory.png', '/static/images/sandwich.png',
-        '/static/images/potatoes_mushrooms.png'
-    ],
+    'Oslo': ['/static/images/oslo_palace.png', '/static/images/oslo_port.png', 'https://imageio.forbes.com/specials-images/imageserve/67780d31ab136252656d799b/0x0.jpg?fit=bounds&format=jpg&height=900&width=1600'],
+    'Repas & gourmandises': ['/static/images/waffles.png', '/static/images/kanelboller.png', '/static/images/lefse.png', '/static/images/rommegrot.png', '/static/images/lefse_savory.png', '/static/images/sandwich.png', '/static/images/potatoes_mushrooms.png'],
 }
 
 OLD_ALIASES = {
@@ -100,7 +88,6 @@ def ensure_schema():
             conn.execute(text('UPDATE pledge SET public_message = FALSE WHERE public_message IS NULL'))
 
 def sync_activities():
-    """Non-destructive update of the existing activity catalog for the new draft."""
     by_title = {a.title: a for a in Activity.query.all()}
     used_ids = set()
     for i, (emoji, title, desc, target) in enumerate(ACTIVITIES):
@@ -121,15 +108,12 @@ def sync_activities():
         activity.sort_order = i
         activity.active = True
         used_ids.add(activity.id)
-        # Merge duplicate/old aliases into the surviving activity without deleting pledges.
         for alias in aliases:
             old = by_title.get(alias)
             if old and old.id != activity.id:
                 Pledge.query.filter_by(activity_id=old.id).update({'activity_id': activity.id})
                 old.active = False
                 used_ids.add(old.id)
-
-    # Hide activities removed from the public draft (notably the old "extras" category).
     for activity in Activity.query.all():
         if activity.id not in used_ids:
             activity.active = False
