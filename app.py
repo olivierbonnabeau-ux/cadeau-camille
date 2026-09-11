@@ -48,12 +48,22 @@ ACTIVITIES = [
 IMAGE_MAP = {
     'Avion': ['/static/images/avion.png'],
     'Tromsø': ['/static/images/tromso.png'],
-    'Croisière Aurore Boréale et Safari Baleine': ['/static/images/quest.png', '/static/images/orca.png', '/static/images/aurora.png'],
+    'Croisière Aurore Boréale et Safari Baleine': [
+        '/static/images/quest.png', '/static/images/orca.png', '/static/images/aurora.png'
+    ],
     'Les îles Lofoten': ['/static/images/lofoten.png'],
     "S'endormir sous les aurores boréales dans des cabanes au bout du monde": ['/static/images/cabin.png'],
     'Traversée Bodø → Moskenes': ['/static/images/ferry.png'],
-    'Oslo': ['/static/images/oslo_palace.png', '/static/images/oslo_port.png', 'https://imageio.forbes.com/specials-images/imageserve/67780d31ab136252656d799b/0x0.jpg?fit=bounds&format=jpg&height=900&width=1600'],
-    'Repas & gourmandises': ['/static/images/waffles.png', '/static/images/kanelboller.png', '/static/images/lefse.png', '/static/images/rommegrot.png', '/static/images/lefse_savory.png', '/static/images/sandwich.png', '/static/images/potatoes_mushrooms.png'],
+    'Oslo': [
+        '/static/images/oslo_palace.png',
+        '/static/images/oslo_port.png',
+        'https://imageio.forbes.com/specials-images/imageserve/67780d31ab136252656d799b/0x0.jpg?fit=bounds&format=jpg&height=900&width=1600'
+    ],
+    'Repas & gourmandises': [
+        '/static/images/waffles.png', '/static/images/kanelboller.png', '/static/images/lefse.png',
+        '/static/images/rommegrot.png', '/static/images/lefse_savory.png', '/static/images/sandwich.png',
+        '/static/images/potatoes_mushrooms.png'
+    ],
 }
 
 OLD_ALIASES = {
@@ -68,9 +78,9 @@ OLD_ALIASES = {
 }
 
 PROMISES = {
+    'Croisière Aurore Boréale et Safari Baleine': 'Une photo de la croisière, des baleines ou des aurores, avec quelques nouvelles de cette aventure en mer.',
     'Avion': 'Une photo du départ ou de l’arrivée à Tromsø avec un petit message personnalisé rien que pour toi.',
     'Tromsø': 'Une jolie photo de Tromsø accompagnée de quelques nouvelles de ses premières découvertes.',
-    'Croisière Aurore Boréale et Safari Baleine': 'Une photo de la croisière, des baleines ou des aurores, avec quelques nouvelles de cette aventure en mer.',
     'Les îles Lofoten': 'Une photo des Lofoten choisie par Camille avec un petit mot personnalisé depuis l’archipel.',
     "S'endormir sous les aurores boréales dans des cabanes au bout du monde": 'Une photo depuis la cabane ou de sa vue, accompagnée d’un message rien que pour toi.',
     'Traversée Bodø → Moskenes': 'Une photo de la traversée vers les Lofoten et un petit récit de ce passage vers l’archipel.',
@@ -124,6 +134,73 @@ with app.app_context():
     db.create_all()
     ensure_schema()
     sync_activities()
+
+@app.after_request
+def final_frontend_fixes(response):
+    if response.content_type and 'text/html' in response.content_type:
+        html = response.get_data(as_text=True)
+        html = html.replace(' · La croisière est offerte séparément par Olivier et n’entre pas dans l’effort d’épargne.', '')
+        html = html.replace(" · La croisière est offerte séparément par Olivier et n'entre pas dans l'effort d'épargne.", '')
+        patch = r'''<script>
+(function(){
+  function getData(id){
+    try { return (typeof activityData !== 'undefined') ? activityData[id] : null; } catch(e) { return null; }
+  }
+  function updateActivity(id){
+    var select=document.querySelector('select[name="activity_id"],#activity');
+    if(select && id!=null) select.value=String(id);
+    var data=getData(id);
+    if(!data) return;
+    var preview=document.querySelector('.selected-preview');
+    if(preview){
+      var img=preview.querySelector('img');
+      var title=preview.querySelector('h3');
+      var desc=preview.querySelector('p');
+      var promise=preview.querySelector('.promise');
+      if(img && data.img) { img.src=data.img; img.alt=data.title||''; }
+      if(title) title.textContent=data.title||'';
+      if(desc) desc.textContent=data.desc||'';
+      if(promise) promise.innerHTML='<b>💌 La promesse de Camille</b><br>'+(data.promise||'Une attention personnalisée depuis le voyage.');
+    }
+  }
+  window.showActivity=updateActivity;
+  window.chooseActivity=function(id){
+    updateActivity(id);
+    var select=document.querySelector('select[name="activity_id"],#activity');
+    if(select) select.value=String(id);
+  };
+  window.setGallery=function(id,index){
+    var g=document.querySelector('[data-gallery="'+id+'"]');
+    if(!g) return;
+    var imgs=Array.prototype.slice.call(g.querySelectorAll('img'));
+    var dots=Array.prototype.slice.call(g.querySelectorAll('.dotg'));
+    if(!imgs.length) return;
+    index=((Number(index)||0)%imgs.length+imgs.length)%imgs.length;
+    imgs.forEach(function(img,n){img.classList.toggle('active',n===index);});
+    dots.forEach(function(dot,n){dot.classList.toggle('active',n===index);});
+    g.dataset.index=String(index);
+  };
+  window.moveGallery=function(id,delta){
+    var g=document.querySelector('[data-gallery="'+id+'"]');
+    if(!g) return;
+    var current=parseInt(g.dataset.index||'0',10)||0;
+    window.setGallery(id,current+(Number(delta)||0));
+  };
+  document.addEventListener('DOMContentLoaded',function(){
+    var select=document.querySelector('select[name="activity_id"],#activity');
+    if(select){
+      select.addEventListener('change',function(){updateActivity(this.value);});
+      updateActivity(select.value);
+    }
+    document.querySelectorAll('[data-gallery]').forEach(function(g){
+      if(!g.dataset.index) g.dataset.index='0';
+    });
+  });
+})();
+</script>'''
+        html = html.replace('</body>', patch + '</body>')
+        response.set_data(html)
+    return response
 
 def admin_ok():
     return session.get('admin') is True
