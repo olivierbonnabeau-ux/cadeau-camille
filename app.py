@@ -266,7 +266,7 @@ def image_for(activity):
 def home():
     acts = Activity.query.filter_by(active=True).order_by(Activity.sort_order, Activity.id).all()
     total = total_pledges()
-    messages = Pledge.query.filter(Pledge.public_message.is_(True), Pledge.message.isnot(None), Pledge.message != '').order_by(Pledge.created_at.desc()).limit(30).all()
+    messages = Pledge.query.order_by(Pledge.created_at.desc()).limit(30).all()
     return render_template('index.html', activities=acts, total=total, goal=1492.5, messages=messages, image_for=image_for, images_for=images_for, promises=PROMISES)
 
 @app.post('/promesse')
