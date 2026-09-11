@@ -1,0 +1,36 @@
+name: Fix banner
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-banner.yml'
+
+jobs:
+  fix-banner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix banner
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('templates/index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '.warning-banner{background:#c51f2a;color:#fff;border:1px solid #ff7b83;border-radius:14px;padding:14px 18px;margin:0 auto 24px;max-width:900px;text-align:center;font-weight:900;font-size:15px;line-height:1.4;box-shadow:0 8px 24px #0006}'
+          new = '.warning-banner{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;width:min(900px,calc(100% - 24px));background:#c51f2a;color:#fff;border:1px solid #ff7b83;border-radius:14px;padding:14px 18px;margin:0;text-align:center;font-weight:900;font-size:15px;line-height:1.4;box-shadow:0 8px 24px #0006}'
+          if old not in s:
+              raise SystemExit('CSS banner not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit and remove workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add templates/index.html
+          git commit -m 'Rend le bandeau rouge fixe' || true
+          git push
+          rm .github/workflows/fix-banner.yml
+          git add .github/workflows/fix-banner.yml
+          git commit -m 'Supprime le workflow temporaire' || true
+          git push
