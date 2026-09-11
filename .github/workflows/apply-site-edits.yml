@@ -15,43 +15,37 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           p=Path('app.py'); s=p.read_text(encoding='utf-8')
-          reps=[
-          ('possibilités d’aurores.', 'possibilités d’aurores boréales.'),
-          ("'Les îles Lofoten', 'Découvrez Sakrisøy, Reine, Hamnøy, les fjords et les montagnes qui plongent dans la mer.', 192.50", "'Les îles Lofoten', 'Découverte de Sakrisøy, Reine, Hamnøy, des fjords et des montagnes qui plongent dans la mer.', 192.50"),
-          ("'S'endormir sous les aurores boréales dans des cabanes au bout du monde', 'Cabin 1 à Å : studio 23 m², cuisine privée, salle de bain, entrée privée, patio et vue mer + montagne.', 173.50", "'S'endormir sous les aurores boréales dans des cabanes au bout du monde', 'Cabine vitrée à Å : patio et vue mer + montagne + Façade vitrée pour les aurores boréales.', 173.50"),
-          ("'Traversée Bodø → Moskenes', 'Traversée piétonne Bodø → Moskenes. Budget prévu : 0 € ; réservation de siège facultative à 65 NOK par personne.', 0", "'Traversée Bodø → Moskenes', 'Traversée piétonne Bodø → Moskenes.', 39"),
-          ("'Croisière Aurore Boréale et Safari Baleine': 'Une photo de la croisière, des baleines ou des aurores, avec quelques nouvelles de cette aventure en mer.'", "'Croisière Aurore Boréale et Safari Baleine': 'Une photo en exclusivité des aurores boréales.'"),
-          ("'Avion': 'Une photo du départ ou de l’arrivée à Tromsø avec un petit message personnalisé rien que pour toi.'", "'Avion': 'Camille devra aller au travail en hiver pour rattraper son empreinte carbone.'"),
-          ("'Tromsø': 'Une jolie photo de Tromsø accompagnée de quelques nouvelles de ses premières découvertes.'", "'Tromsø': 'Camille vous enverra une carte postale de l’endroit le plus au nord de la Planète.'"),
-          ("'Les îles Lofoten': 'Une photo des Lofoten choisie par Camille avec un petit mot personnalisé depuis l’archipel.'", "'Les îles Lofoten': 'Camille devra prononcer 3 fois correctement Kjærlighet devant vous.'"),
-          ("\"S'endormir sous les aurores boréales dans des cabanes au bout du monde\": 'Une photo depuis la cabane ou de sa vue, accompagnée d’un message rien que pour toi.'", "\"S'endormir sous les aurores boréales dans des cabanes au bout du monde\": 'Vous envoyez une photo de la vue, sans se la raconter.'"),
-          ("'Traversée Bodø → Moskenes': 'Une photo de la traversée vers les Lofoten et un petit récit de ce passage vers l’archipel.'", "'Traversée Bodø → Moskenes': 'Camille vous chantera une petite chanson de marin norvégienne !'"),
-          ("'Oslo': 'Une photo d’Oslo et les dernières nouvelles de l’aventure avant le retour.'", "'Oslo': 'Camille vous fera écouter sa chanson norvégienne préférée du voyage.'"),
-          ("'Repas & gourmandises': 'Une photo d’un repas ou d’une gourmandise découverte pendant le voyage, avec les impressions de Camille.'", "'Repas & gourmandises': 'Camille mangera à votre santé sa gourmandise norvégienne préférée du voyage'"),
-          ("'Tromsø': ['/static/images/tromso.png']", "'Tromsø': ['/static/images/tromso.png', '/static/images/tromso_01.jpeg', '/static/images/tromso_02.jpeg']"),
-          ("'Les îles Lofoten': ['/static/images/lofoten.png']", "'Les îles Lofoten': ['/static/images/lofoten.png', '/static/images/lofoten_01.jpeg', '/static/images/lofoten_02.jpeg']"),
-          ("\"S'endormir sous les aurores boréales dans des cabanes au bout du monde\": ['/static/images/cabin.png']", "\"S'endormir sous les aurores boréales dans des cabanes au bout du monde\": ['/static/images/cabin.png', '/static/images/cabane_aa_01.jpeg', '/static/images/cabane_aa_02.jpeg', '/static/images/cabane_aa_03.jpeg']"),
-          ("'Traversée Bodø → Moskenes':0", "'Traversée Bodø → Moskenes':39"),
-          ('goal=1492.5','goal=1531.5'),
-          ("'Avion':'Une photo du départ ou de l’arrivée à Tromsø avec un petit message personnalisé rien que pour toi.'", "'Avion':'Camille devra aller au travail en hiver pour rattraper son empreinte carbone.'"),
-          ("'Tromsø':'Une jolie photo de Tromsø accompagnée de quelques nouvelles de ses premières découvertes.'", "'Tromsø':'Camille vous enverra une carte postale de l’endroit le plus au nord de la Planète.'"),
-          ("'Croisière Aurore Boréale et Safari Baleine':'Une photo de la croisière, des baleines ou des aurores, avec quelques nouvelles de cette aventure en mer.'", "'Croisière Aurore Boréale et Safari Baleine':'Une photo en exclusivité des aurores boréales.'"),
-          ("'Les îles Lofoten':'Une photo des Lofoten choisie par Camille avec un petit mot personnalisé depuis l’archipel.'", "'Les îles Lofoten':'Camille devra prononcer 3 fois correctement Kjærlighet devant vous.'"),
-          ("\"S'endormir sous les aurores boréales dans des cabanes au bout du monde\":'Une photo depuis la cabane ou de sa vue, accompagnée d’un message rien que pour toi.'", "\"S'endormir sous les aurores boréales dans des cabanes au bout du monde\":'Vous envoyez une photo de la vue, sans se la raconter.'"),
-          ("'Traversée Bodø → Moskenes':'Une photo de la traversée vers les Lofoten et un petit récit de ce passage vers l’archipel.'", "'Traversée Bodø → Moskenes':'Camille vous chantera une petite chanson de marin norvégienne !'"),
-          ("'Oslo':'Une photo d’Oslo et les dernières nouvelles de l’aventure avant le retour.'", "'Oslo':'Camille vous fera écouter sa chanson norvégienne préférée du voyage.'"),
-          ("'Repas & gourmandises':'Une photo d’un repas ou d’une gourmandise découverte pendant le voyage, avec les impressions de Camille.'", "'Repas & gourmandises':'Camille mangera à votre santé sa gourmandise norvégienne préférée du voyage'"),
-          ]
-          for a,b in reps:
-            if a not in s: raise SystemExit('missing: '+a[:55])
-            s=s.replace(a,b,1)
+          reps={
+          "d’aurores.', 380":"d’aurores boréales.', 380",
+          "'Découvrez Sakrisøy, Reine, Hamnøy, les fjords et les montagnes qui plongent dans la mer.'":"'Découverte de Sakrisøy, Reine, Hamnøy, des fjords et des montagnes qui plongent dans la mer.'",
+          "'Cabin 1 à Å : studio 23 m², cuisine privée, salle de bain, entrée privée, patio et vue mer + montagne.'":"'Cabine vitrée à Å : patio et vue mer + montagne + Façade vitrée pour les aurores boréales.'",
+          "'Traversée piétonne Bodø → Moskenes. Budget prévu : 0 € ; réservation de siège facultative à 65 NOK par personne.', 0":"'Traversée piétonne Bodø → Moskenes.', 39",
+          "'Traversée Bodø → Moskenes':0":"'Traversée Bodø → Moskenes':39",
+          "'Croisière Aurore Boréale et Safari Baleine': 'Une photo de la croisière, des baleines ou des aurores, avec quelques nouvelles de cette aventure en mer.'":"'Croisière Aurore Boréale et Safari Baleine': 'Une photo en exclusivité des aurores boréales.'",
+          "'Avion': 'Une photo du départ ou de l’arrivée à Tromsø avec un petit message personnalisé rien que pour toi.'":"'Avion': 'Camille devra aller au travail en hiver pour rattraper son empreinte carbone.'",
+          "'Tromsø': 'Une jolie photo de Tromsø accompagnée de quelques nouvelles de ses premières découvertes.'":"'Tromsø': 'Camille vous enverra une carte postale de l’endroit le plus au nord de la Planète.'",
+          "'Les îles Lofoten': 'Une photo des Lofoten choisie par Camille avec un petit mot personnalisé depuis l’archipel.'":"'Les îles Lofoten': 'Camille devra prononcer 3 fois correctement Kjærlighet devant vous.'",
+          "'Traversée Bodø → Moskenes': 'Une photo de la traversée vers les Lofoten et un petit récit de ce passage vers l’archipel.'":"'Traversée Bodø → Moskenes': 'Camille vous chantera une petite chanson de marin norvégienne !'",
+          "'Oslo': 'Une photo d’Oslo et les dernières nouvelles de l’aventure avant le retour.'":"'Oslo': 'Camille vous fera écouter sa chanson norvégienne préférée du voyage.'",
+          "'Repas & gourmandises': 'Une photo d’un repas ou d’une gourmandise découverte pendant le voyage, avec les impressions de Camille.'":"'Repas & gourmandises': 'Camille mangera à votre santé sa gourmandise norvégienne préférée du voyage'",
+          "'Avion':'Une photo du départ ou de l’arrivée à Tromsø avec un petit message personnalisé rien que pour toi.'":"'Avion':'Camille devra aller au travail en hiver pour rattraper son empreinte carbone.'",
+          "'Tromsø':'Une jolie photo de Tromsø accompagnée de quelques nouvelles de ses premières découvertes.'":"'Tromsø':'Camille vous enverra une carte postale de l’endroit le plus au nord de la Planète.'",
+          "'Croisière Aurore Boréale et Safari Baleine':'Une photo de la croisière, des baleines ou des aurores, avec quelques nouvelles de cette aventure en mer.'":"'Croisière Aurore Boréale et Safari Baleine':'Une photo en exclusivité des aurores boréales.'",
+          "'Les îles Lofoten':'Une photo des Lofoten choisie par Camille avec un petit mot personnalisé depuis l’archipel.'":"'Les îles Lofoten':'Camille devra prononcer 3 fois correctement Kjærlighet devant vous.'",
+          "'Traversée Bodø → Moskenes':'Une photo de la traversée vers les Lofoten et un petit récit de ce passage vers l’archipel.'":"'Traversée Bodø → Moskenes':'Camille vous chantera une petite chanson de marin norvégienne !'",
+          "'Oslo':'Une photo d’Oslo et les dernières nouvelles de l’aventure avant le retour.'":"'Oslo':'Camille vous fera écouter sa chanson norvégienne préférée du voyage.'",
+          "'Repas & gourmandises':'Une photo d’un repas ou d’une gourmandise découverte pendant le voyage, avec les impressions de Camille.'":"'Repas & gourmandises':'Camille mangera à votre santé sa gourmandise norvégienne préférée du voyage'",
+          "'Tromsø': ['/static/images/tromso.png']":"'Tromsø': ['/static/images/tromso.png', '/static/images/tromso_01.jpeg', '/static/images/tromso_02.jpeg']",
+          "'Les îles Lofoten': ['/static/images/lofoten.png']":"'Les îles Lofoten': ['/static/images/lofoten.png', '/static/images/lofoten_01.jpeg', '/static/images/lofoten_02.jpeg']",
+          "\"S'endormir sous les aurores boréales dans des cabanes au bout du monde\": ['/static/images/cabin.png']":"\"S'endormir sous les aurores boréales dans des cabanes au bout du monde\": ['/static/images/cabin.png', '/static/images/cabane_aa_01.jpeg', '/static/images/cabane_aa_02.jpeg', '/static/images/cabane_aa_03.jpeg']",
+          'goal=1492.5':'goal=1531.5'
+          }
+          for a,b in reps.items(): s=s.replace(a,b)
           p.write_text(s,encoding='utf-8')
           p=Path('templates/index.html'); t=p.read_text(encoding='utf-8')
-          t=t.replace('goal_value=1492.5','goal_value=1531.5',1).replace('Objectif de la cagnotte : ≈ 1 493 €','Objectif de la cagnotte : ≈ 1 532 €',1)
-          old='<p><b>Devenez le sponsor d’un souvenir !</b><br>Plutôt qu’une cagnotte impersonnelle, choisissez concrètement <b>ce que vous souhaitez offrir à Camille</b>. En retour, Camille vous enverra des <b>photos et des nouvelles personnalisées</b> depuis l’étape que vous aurez parrainée !</p><p style="font-size:15px">Pas de paiement en ligne ici : faites simplement une promesse de don et laissez-lui un petit mot pour son anniversaire.<br>Vous pourrez ensuite <b>lui remettre directement votre participation quand les détails du voyage seront définitifs</b>. ❤️</p>'
-          new='<p><b>Devenez le sponsor d’un souvenir !</b></p><p style="font-size:15px">Pas de paiement en ligne ici : faites simplement une promesse de don et laissez-lui un petit mot pour son anniversaire.<br>Vous pourrez ensuite lui remettre directement votre participation quand les détails du voyage seront définitifs. ❤️</p>'
-          if old not in t: raise SystemExit('missing intro')
-          t=t.replace(old,new,1)
+          t=t.replace('goal_value=1492.5','goal_value=1531.5').replace('Objectif de la cagnotte : ≈ 1 493 €','Objectif de la cagnotte : ≈ 1 532 €')
+          old='<p><b>Devenez le sponsor d’un souvenir !</b><br>Plutôt qu’une cagnotte impersonnelle, choisissez concrètement <b>ce que vous souhaitez offrir à Camille</b>. En retour, Camille vous enverra des <b>photos et des nouvelles personnalisées</b> depuis l’étape que vous aurez parrainée !</p>'
+          t=t.replace(old,'<p><b>Devenez le sponsor d’un souvenir !</b></p>')
           p.write_text(t,encoding='utf-8')
           PY
       - name: Commit and remove workflow
