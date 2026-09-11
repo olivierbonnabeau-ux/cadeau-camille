@@ -48,22 +48,12 @@ ACTIVITIES = [
 IMAGE_MAP = {
     'Avion': ['/static/images/avion.png'],
     'Tromsø': ['/static/images/tromso.png'],
-    'Croisière Aurore Boréale et Safari Baleine': [
-        '/static/images/quest.png', '/static/images/orca.png', '/static/images/aurora.png'
-    ],
+    'Croisière Aurore Boréale et Safari Baleine': ['/static/images/quest.png', '/static/images/orca.png', '/static/images/aurora.png'],
     'Les îles Lofoten': ['/static/images/lofoten.png'],
     "S'endormir sous les aurores boréales dans des cabanes au bout du monde": ['/static/images/cabin.png'],
     'Traversée Bodø → Moskenes': ['/static/images/ferry.png'],
-    'Oslo': [
-        '/static/images/oslo_palace.png',
-        '/static/images/oslo_port.png',
-        'https://imageio.forbes.com/specials-images/imageserve/67780d31ab136252656d799b/0x0.jpg?fit=bounds&format=jpg&height=900&width=1600'
-    ],
-    'Repas & gourmandises': [
-        '/static/images/waffles.png', '/static/images/kanelboller.png', '/static/images/lefse.png',
-        '/static/images/rommegrot.png', '/static/images/lefse_savory.png', '/static/images/sandwich.png',
-        '/static/images/potatoes_mushrooms.png'
-    ],
+    'Oslo': ['/static/images/oslo_palace.png', '/static/images/oslo_port.png', 'https://imageio.forbes.com/specials-images/imageserve/67780d31ab136252656d799b/0x0.jpg?fit=bounds&format=jpg&height=900&width=1600'],
+    'Repas & gourmandises': ['/static/images/waffles.png', '/static/images/kanelboller.png', '/static/images/lefse.png', '/static/images/rommegrot.png', '/static/images/lefse_savory.png', '/static/images/sandwich.png', '/static/images/potatoes_mushrooms.png'],
 }
 
 OLD_ALIASES = {
@@ -144,73 +134,89 @@ def final_frontend_fixes(response):
         patch = r'''<script>
 (function(){
   var activityPrices={
-    '✈️ Avion':256,
-    '🌌 Tromsø':380,
-    '🐋 Croisière Aurore Boréale et Safari Baleine':1215,
-    '🏔️ Les îles Lofoten':192.50,
-    "🛖 S'endormir sous les aurores boréales dans des cabanes au bout du monde":173.50,
-    '⛴️ Traversée Bodø → Moskenes':0,
-    '🏙️ Oslo':160,
-    '🍽️ Repas & gourmandises':330
+    'Avion':256,
+    'Tromsø':380,
+    'Croisière Aurore Boréale et Safari Baleine':1215,
+    'Les îles Lofoten':192.50,
+    "S'endormir sous les aurores boréales dans des cabanes au bout du monde":173.50,
+    'Traversée Bodø → Moskenes':0,
+    'Oslo':160,
+    'Repas & gourmandises':330
   };
-  function getData(id){
-    try { return (typeof activityData !== 'undefined') ? activityData[id] : null; } catch(e) { return null; }
+  var activityPromises={
+    'Avion':'Une photo du départ ou de l’arrivée à Tromsø avec un petit message personnalisé rien que pour toi.',
+    'Tromsø':'Une jolie photo de Tromsø accompagnée de quelques nouvelles de ses premières découvertes.',
+    'Croisière Aurore Boréale et Safari Baleine':'Une photo de la croisière, des baleines ou des aurores, avec quelques nouvelles de cette aventure en mer.',
+    'Les îles Lofoten':'Une photo des Lofoten choisie par Camille avec un petit mot personnalisé depuis l’archipel.',
+    "S'endormir sous les aurores boréales dans des cabanes au bout du monde":'Une photo depuis la cabane ou de sa vue, accompagnée d’un message rien que pour toi.',
+    'Traversée Bodø → Moskenes':'Une photo de la traversée vers les Lofoten et un petit récit de ce passage vers l’archipel.',
+    'Oslo':'Une photo d’Oslo et les dernières nouvelles de l’aventure avant le retour.',
+    'Repas & gourmandises':'Une photo d’un repas ou d’une gourmandise découverte pendant le voyage, avec les impressions de Camille.'
+  };
+  function getSelectedTitle(){
+    var select=document.querySelector('select[name="activity_id"],#activity');
+    if(!select || !select.options.length) return '';
+    var option=select.options[select.selectedIndex];
+    return (option.textContent||'').replace(/\s+—\s+offerte par Olivier\s*$/,'').trim().replace(/^[^A-Za-zÀ-ÿ0-9]+\s*/,'');
+  }
+  function getCardData(title){
+    var cards=document.querySelectorAll('#activites .activity-card');
+    for(var i=0;i<cards.length;i++){
+      var h=cards[i].querySelector('h3');
+      if(!h) continue;
+      var cardTitle=(h.textContent||'').trim().replace(/^[^A-Za-zÀ-ÿ0-9]+\s*/,'');
+      if(cardTitle===title || cardTitle.indexOf(title)>=0){
+        var img=cards[i].querySelector('.media img, .gallery img');
+        var p=cards[i].querySelector('.cardbody > p');
+        var price=cards[i].querySelector('.price');
+        return {title:cardTitle, img:img?img.src:'', desc:p?p.textContent.trim():'', price:price?price.textContent.trim():''};
+      }
+    }
+    return null;
   }
   function ensurePriceElement(){
-    var detail=document.getElementById('activity-detail');
-    if(!detail) return null;
-    var content=detail.querySelector(':scope > div:last-child');
-    if(!content) content=detail.querySelector('div');
+    var preview=document.querySelector('.selected-preview');
+    if(!preview) return null;
+    var content=preview.querySelector(':scope > div');
     if(!content) return null;
-    var price=document.getElementById('detail-price');
+    var price=document.getElementById('selected-price');
     if(!price){
       price=document.createElement('div');
-      price.id='detail-price';
+      price.id='selected-price';
       price.style.cssText='font-size:20px;font-weight:800;margin:0 0 10px;color:#f5d58a;';
-      var title=content.querySelector('#detail-title');
+      var title=content.querySelector('#selected-title');
       if(title) content.insertBefore(price,title);
       else content.prepend(price);
     }
     return price;
   }
-  function updatePrice(data){
-    var price=ensurePriceElement();
-    if(!price || !data) return;
-    var amount=activityPrices[data.title];
-    if(amount===undefined){ price.textContent=''; return; }
-    price.textContent='💶 Montant du poste : '+(Number.isInteger(amount)?amount:amount.toFixed(2))+' €';
-  }
   function updateActivity(id){
     var select=document.querySelector('select[name="activity_id"],#activity');
     if(select && id!=null) select.value=String(id);
-    var data=getData(id);
-    if(!data) return;
-    var preview=document.querySelector('.selected-preview');
-    if(preview){
-      var img=preview.querySelector('img');
-      var title=preview.querySelector('h3');
-      var desc=preview.querySelector('p');
-      var promise=preview.querySelector('.promise');
-      if(img && data.img) { img.src=data.img; img.alt=data.title||''; }
-      if(title) title.textContent=data.title||'';
-      if(desc) desc.textContent=data.desc||'';
-      if(promise) promise.innerHTML='<b>💌 La promesse de Camille</b><br>'+(data.promise||'Une attention personnalisée depuis le voyage.');
+    var title=getSelectedTitle();
+    var card=getCardData(title);
+    if(!card) return;
+    var img=document.getElementById('selected-img');
+    var h=document.getElementById('selected-title');
+    var p=document.getElementById('selected-desc');
+    var promise=document.getElementById('selected-promise');
+    if(img && card.img){img.src=card.img;img.alt=title;}
+    if(h) h.textContent=(card.title||title);
+    if(p) p.textContent=card.desc||'';
+    if(promise) promise.textContent=activityPromises[title]||'';
+    var price=ensurePriceElement();
+    if(price){
+      var amount=activityPrices[title];
+      price.textContent='💶 Montant du poste : '+(amount===undefined?'':(Number.isInteger(amount)?amount:amount.toFixed(2))+' €');
     }
-    var detailTitle=document.getElementById('detail-title');
-    var detailDesc=document.getElementById('detail-desc');
-    var detailPromise=document.getElementById('detail-promise');
-    var detailImg=document.getElementById('detail-img');
-    if(detailTitle) detailTitle.textContent=data.title||'';
-    if(detailDesc) detailDesc.textContent=data.desc||'';
-    if(detailPromise) detailPromise.textContent=data.promise||'Une attention personnalisée depuis le voyage.';
-    if(detailImg && data.img){ detailImg.src=data.img; detailImg.alt=data.title||''; }
-    updatePrice(data);
   }
   window.showActivity=updateActivity;
   window.chooseActivity=function(id){
-    updateActivity(id);
     var select=document.querySelector('select[name="activity_id"],#activity');
     if(select) select.value=String(id);
+    updateActivity(id);
+    var target=document.getElementById('promesse');
+    if(target) target.scrollIntoView({behavior:'smooth'});
   };
   window.setGallery=function(id,index){
     var g=document.querySelector('[data-gallery="'+id+'"]');
@@ -230,22 +236,13 @@ def final_frontend_fixes(response):
     window.setGallery(id,current+(Number(delta)||0));
   };
   document.addEventListener('DOMContentLoaded',function(){
-    var select=document.querySelector('select[name="activity_id"],#activity');
     ensurePriceElement();
-    var firstData=null;
-    if(typeof activityData !== 'undefined'){
-      var firstCard=document.querySelector('.select-card');
-      if(firstCard) firstData=getData(firstCard.getAttribute('data-id'));
-    }
+    var select=document.querySelector('select[name="activity_id"],#activity');
     if(select){
       select.addEventListener('change',function(){updateActivity(this.value);});
       updateActivity(select.value);
-    } else if(firstData){
-      updatePrice(firstData);
     }
-    document.querySelectorAll('[data-gallery]').forEach(function(g){
-      if(!g.dataset.index) g.dataset.index='0';
-    });
+    document.querySelectorAll('[data-gallery]').forEach(function(g){if(!g.dataset.index)g.dataset.index='0';});
   });
 })();
 </script>'''
