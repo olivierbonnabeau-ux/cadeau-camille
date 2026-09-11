@@ -39,7 +39,6 @@ class Pledge(db.Model):
 ACTIVITIES = [
     ('✈️', 'Avion', 'Les vols de l’aventure : Paris → Tromsø → Bodø → Oslo → Paris.', 256),
     ('🌌', 'Tromsø', 'Trois nuits à Tromsø pour découvrir la ville, le port, les cafés et profiter des possibilités d’aurores.', 380),
-    ('🐋', 'Croisière Aurore Boréale et Safari Baleine', '24 h en mer : safari baleine, recherche d’aurores, cabine double, dîner, petit-déjeuner et déjeuner inclus.', 607.53),
     ('🏔️', 'Les îles Lofoten', 'Découvrez Sakrisøy, Reine, Hamnøy, les fjords et les montagnes qui plongent dans la mer.', 192.50),
     ('🛖', "S'endormir sous les aurores boréales dans des cabanes au bout du monde", 'Cabin 1 à Å : studio 23 m², cuisine privée, salle de bain, entrée privée, patio et vue mer + montagne.', 173.50),
     ('⛴️', 'Traversée Bodø → Moskenes', 'Traversée piétonne Bodø → Moskenes. Budget prévu : 0 € ; réservation de siège facultative à 65 NOK par personne.', 0),
@@ -49,23 +48,23 @@ ACTIVITIES = [
 
 # Images uploaded/selected for this draft. They are stored locally so the draft is self-contained.
 IMAGE_MAP = {
-    'Avion': ['/static/images/avion.jpg'],
-    'Tromsø': ['/static/images/tromso.jpg'],
+    'Avion': ['/static/images/avion.png'],
+    'Tromsø': ['/static/images/tromso.png'],
     'Croisière Aurore Boréale et Safari Baleine': [
-        '/static/images/quest.jpg', '/static/images/orca.jpg', '/static/images/aurora.jpg'
+        '/static/images/quest.png', '/static/images/orca.png', '/static/images/aurora.png'
     ],
-    'Les îles Lofoten': ['/static/images/lofoten.jpg'],
-    "S'endormir sous les aurores boréales dans des cabanes au bout du monde": ['/static/images/cabin.jpg'],
-    'Traversée Bodø → Moskenes': ['/static/images/ferry.jpg'],
+    'Les îles Lofoten': ['/static/images/lofoten.png'],
+    "S'endormir sous les aurores boréales dans des cabanes au bout du monde": ['/static/images/cabin.png'],
+    'Traversée Bodø → Moskenes': ['/static/images/ferry.png'],
     'Oslo': [
-        '/static/images/oslo_palace.jpg',
-        '/static/images/oslo_port.jpg',
+        '/static/images/oslo_palace.png',
+        '/static/images/oslo_port.png',
         'https://imageio.forbes.com/specials-images/imageserve/67780d31ab136252656d799b/0x0.jpg?fit=bounds&format=jpg&height=900&width=1600'
     ],
     'Repas & gourmandises': [
-        '/static/images/waffles.jpg', '/static/images/kanelboller.jpg', '/static/images/lefse.jpg',
-        '/static/images/rommegrot.jpg', '/static/images/lefse_savory.jpg', '/static/images/sandwich.jpg',
-        '/static/images/potatoes_mushrooms.jpg'
+        '/static/images/waffles.png', '/static/images/kanelboller.png', '/static/images/lefse.png',
+        '/static/images/rommegrot.png', '/static/images/lefse_savory.png', '/static/images/sandwich.png',
+        '/static/images/potatoes_mushrooms.png'
     ],
 }
 
@@ -80,7 +79,17 @@ OLD_ALIASES = {
     'Repas & gourmandises': ['Les repas & courses', 'Repas & gourmandises'],
 }
 
-FALLBACK_IMAGE = '/static/images/lofoten.jpg'
+PROMISES = {
+    'Avion': 'Une photo du départ ou de l’arrivée à Tromsø avec un petit message personnalisé rien que pour toi.',
+    'Tromsø': 'Une jolie photo de Tromsø accompagnée de quelques nouvelles de ses premières découvertes.',
+    'Les îles Lofoten': 'Une photo des Lofoten choisie par Camille avec un petit mot personnalisé depuis l’archipel.',
+    "S'endormir sous les aurores boréales dans des cabanes au bout du monde": 'Une photo depuis la cabane ou de sa vue, accompagnée d’un message rien que pour toi.',
+    'Traversée Bodø → Moskenes': 'Une photo de la traversée vers les Lofoten et un petit récit de ce passage vers l’archipel.',
+    'Oslo': 'Une photo d’Oslo et les dernières nouvelles de l’aventure avant le retour.',
+    'Repas & gourmandises': 'Une photo d’un repas ou d’une gourmandise découverte pendant le voyage, avec les impressions de Camille.',
+}
+
+FALLBACK_IMAGE = '/static/images/lofoten.png'
 
 def ensure_schema():
     inspector = inspect(db.engine)
@@ -135,7 +144,7 @@ def admin_ok():
     return session.get('admin') is True
 
 def total_pledges():
-    return db.session.query(func.coalesce(func.sum(Pledge.amount), 0)).scalar() or 0
+    return db.session.query(func.coalesce(func.sum(Pledge.amount), 0)).join(Activity, Pledge.activity_id == Activity.id).filter(Activity.active.is_(True)).scalar() or 0
 
 def images_for(activity):
     return IMAGE_MAP.get(activity.title, [FALLBACK_IMAGE])
@@ -148,7 +157,7 @@ def home():
     acts = Activity.query.filter_by(active=True).order_by(Activity.sort_order, Activity.id).all()
     total = total_pledges()
     messages = Pledge.query.filter(Pledge.public_message.is_(True), Pledge.message.isnot(None), Pledge.message != '').order_by(Pledge.created_at.desc()).limit(30).all()
-    return render_template('index.html', activities=acts, total=total, goal=2400, messages=messages, image_for=image_for, images_for=images_for)
+    return render_template('index.html', activities=acts, total=total, goal=2400, messages=messages, image_for=image_for, images_for=images_for, promises=PROMISES)
 
 @app.post('/promesse')
 def pledge():
