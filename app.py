@@ -143,8 +143,42 @@ def final_frontend_fixes(response):
         html = html.replace(" · La croisière est offerte séparément par Olivier et n'entre pas dans l'effort d'épargne.", '')
         patch = r'''<script>
 (function(){
+  var activityPrices={
+    '✈️ Avion':256,
+    '🌌 Tromsø':380,
+    '🐋 Croisière Aurore Boréale et Safari Baleine':1215,
+    '🏔️ Les îles Lofoten':192.50,
+    "🛖 S'endormir sous les aurores boréales dans des cabanes au bout du monde":173.50,
+    '⛴️ Traversée Bodø → Moskenes':0,
+    '🏙️ Oslo':160,
+    '🍽️ Repas & gourmandises':330
+  };
   function getData(id){
     try { return (typeof activityData !== 'undefined') ? activityData[id] : null; } catch(e) { return null; }
+  }
+  function ensurePriceElement(){
+    var detail=document.getElementById('activity-detail');
+    if(!detail) return null;
+    var content=detail.querySelector(':scope > div:last-child');
+    if(!content) content=detail.querySelector('div');
+    if(!content) return null;
+    var price=document.getElementById('detail-price');
+    if(!price){
+      price=document.createElement('div');
+      price.id='detail-price';
+      price.style.cssText='font-size:20px;font-weight:800;margin:0 0 10px;color:#f5d58a;';
+      var title=content.querySelector('#detail-title');
+      if(title) content.insertBefore(price,title);
+      else content.prepend(price);
+    }
+    return price;
+  }
+  function updatePrice(data){
+    var price=ensurePriceElement();
+    if(!price || !data) return;
+    var amount=activityPrices[data.title];
+    if(amount===undefined){ price.textContent=''; return; }
+    price.textContent='💶 Montant du poste : '+(Number.isInteger(amount)?amount:amount.toFixed(2))+' €';
   }
   function updateActivity(id){
     var select=document.querySelector('select[name="activity_id"],#activity');
@@ -162,6 +196,15 @@ def final_frontend_fixes(response):
       if(desc) desc.textContent=data.desc||'';
       if(promise) promise.innerHTML='<b>💌 La promesse de Camille</b><br>'+(data.promise||'Une attention personnalisée depuis le voyage.');
     }
+    var detailTitle=document.getElementById('detail-title');
+    var detailDesc=document.getElementById('detail-desc');
+    var detailPromise=document.getElementById('detail-promise');
+    var detailImg=document.getElementById('detail-img');
+    if(detailTitle) detailTitle.textContent=data.title||'';
+    if(detailDesc) detailDesc.textContent=data.desc||'';
+    if(detailPromise) detailPromise.textContent=data.promise||'Une attention personnalisée depuis le voyage.';
+    if(detailImg && data.img){ detailImg.src=data.img; detailImg.alt=data.title||''; }
+    updatePrice(data);
   }
   window.showActivity=updateActivity;
   window.chooseActivity=function(id){
@@ -188,9 +231,17 @@ def final_frontend_fixes(response):
   };
   document.addEventListener('DOMContentLoaded',function(){
     var select=document.querySelector('select[name="activity_id"],#activity');
+    ensurePriceElement();
+    var firstData=null;
+    if(typeof activityData !== 'undefined'){
+      var firstCard=document.querySelector('.select-card');
+      if(firstCard) firstData=getData(firstCard.getAttribute('data-id'));
+    }
     if(select){
       select.addEventListener('change',function(){updateActivity(this.value);});
       updateActivity(select.value);
+    } else if(firstData){
+      updatePrice(firstData);
     }
     document.querySelectorAll('[data-gallery]').forEach(function(g){
       if(!g.dataset.index) g.dataset.index='0';
