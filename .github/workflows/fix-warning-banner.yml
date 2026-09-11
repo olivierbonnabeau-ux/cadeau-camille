@@ -1,0 +1,38 @@
+name: Fix warning banner
+on:
+  push:
+    branches: [main]
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix banner CSS
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('templates/index.html')
+          s = p.read_text()
+          old = '.warning-banner{background:#c51f2a;color:#fff;border:1px solid #ff7b83;border-radius:14px;padding:14px 18px;margin:0 auto 24px;max-width:900px;text-align:center;font-weight:900;font-size:15px;line-height:1.4;box-shadow:0 8px 24px #0006}'
+          new = old[:-1] + ';position:fixed;top:0;left:0;right:0;width:100%;max-width:none;margin:0;border-radius:0;z-index:99999}'
+          if old not in s:
+              raise SystemExit('warning-banner CSS introuvable')
+          s = s.replace(old, new, 1)
+          s = s.replace('.hero{padding:70px 0 45px;', '.hero{padding:90px 0 45px;', 1)
+          s = s.replace('.hero{padding-top:48px}', '.hero{padding-top:85px}', 1)
+          p.write_text(s)
+          PY
+      - name: Commit and remove workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add templates/index.html
+          git commit -m 'Fixe le bandeau rouge pendant le scroll' || true
+          git push
+          rm .github/workflows/fix-warning-banner.yml
+          git add .github/workflows/fix-warning-banner.yml
+          git commit -m 'Supprime le workflow temporaire' || true
+          git push
