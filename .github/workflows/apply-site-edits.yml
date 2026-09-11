@@ -1,0 +1,36 @@
+name: Apply site edits
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  edit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply requested text and UI changes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('templates/index.html')
+          s=p.read_text()
+          s=s.replace("objectif {{'%.0f'|format(goal_value)}} €","reste à charge pour Camille {{'%.0f'|format(goal_value)}} €")
+          s=s.replace("Pas de paiement en ligne ici : faites simplement une promesse de don et laissez-lui un petit mot pour son anniversaire.<br>Vous pourrez ensuite <b>lui remettre directement votre participation</b>. ❤️","Pas de paiement en ligne ici : faites simplement une promesse de don et laissez-lui un petit mot pour son anniversaire.<br>Vous pourrez ensuite <b>lui remettre directement votre participation quand les détails du voyage seront définitifs</b>. ❤️")
+          s=s.replace(".flash{padding:14px;border-radius:12px;margin:18px 0}",".flash{padding:16px 18px;border-radius:14px;margin:18px 0;font-weight:700;border:1px solid}.success{background:linear-gradient(135deg,#174f3f,#12352e);border-color:#49d3a0;box-shadow:0 8px 24px #0005}.error{background:#4a2424;border-color:#d56b6b}.warning-banner{background:#c51f2a;color:#fff;border:1px solid #ff7b83;border-radius:14px;padding:14px 18px;margin:0 auto 24px;max-width:900px;text-align:center;font-weight:900;font-size:15px;line-height:1.4;box-shadow:0 8px 24px #0006}")
+          s=s.replace('<header class="hero"><div class="wrap">','<header class="hero"><div class="wrap"><div class="warning-banner">⚠️ Attention, la surprise ne lui sera dévoilée que le 30 Septembre, ne pas vendre la mèche !</div>')
+          p.write_text(s)
+          p=Path('app.py')
+          s=p.read_text()
+          s=s.replace("flash('Merci ! Ta promesse a bien été enregistrée. ❤️', 'success')","flash('Merci pour elle ! Votre don a bien été enregistré, on se recontacte quand nous procéderons aux réservations pour que Camille puisse récupérer sa part.', 'success')")
+          p.write_text(s)
+          PY
+      - name: Remove temporary files
+        run: rm -f static/images/traversee-bodo-moskenes.b64 static/images/traversee-bodo-moskenes.txt static/images/traversee-bodo-moskenes.jpg
+      - name: Commit changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app.py templates/index.html static/images
+          git diff --cached --quiet || git commit -m 'Mise à jour du message de surprise et de la promesse de don'
+          git push
