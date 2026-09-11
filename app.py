@@ -49,23 +49,23 @@ ACTIVITIES = [
 
 # Images uploaded/selected for this draft. They are stored locally so the draft is self-contained.
 IMAGE_MAP = {
-    'Avion': ['/static/images/avion.png'],
-    'Tromsø': ['/static/images/tromso.png'],
+    'Avion': ['/static/images/avion.jpg'],
+    'Tromsø': ['/static/images/tromso.jpg'],
     'Croisière Aurore Boréale et Safari Baleine': [
-        '/static/images/quest.png', '/static/images/orca.png', '/static/images/aurora.png'
+        '/static/images/quest.jpg', '/static/images/orca.jpg', '/static/images/aurora.jpg'
     ],
-    'Les îles Lofoten': ['/static/images/lofoten.png'],
-    "S'endormir sous les aurores boréales dans des cabanes au bout du monde": ['/static/images/cabin.png'],
-    'Traversée Bodø → Moskenes': ['/static/images/ferry.png'],
+    'Les îles Lofoten': ['/static/images/lofoten.jpg'],
+    "S'endormir sous les aurores boréales dans des cabanes au bout du monde": ['/static/images/cabin.jpg'],
+    'Traversée Bodø → Moskenes': ['/static/images/ferry.jpg'],
     'Oslo': [
-        '/static/images/oslo_palace.png',
-        '/static/images/oslo_port.png',
+        '/static/images/oslo_palace.jpg',
+        '/static/images/oslo_port.jpg',
         'https://imageio.forbes.com/specials-images/imageserve/67780d31ab136252656d799b/0x0.jpg?fit=bounds&format=jpg&height=900&width=1600'
     ],
     'Repas & gourmandises': [
-        '/static/images/waffles.png', '/static/images/kanelboller.png', '/static/images/lefse.png',
-        '/static/images/rommegrot.png', '/static/images/lefse_savory.png', '/static/images/sandwich.png',
-        '/static/images/potatoes_mushrooms.png'
+        '/static/images/waffles.jpg', '/static/images/kanelboller.jpg', '/static/images/lefse.jpg',
+        '/static/images/rommegrot.jpg', '/static/images/lefse_savory.jpg', '/static/images/sandwich.jpg',
+        '/static/images/potatoes_mushrooms.jpg'
     ],
 }
 
@@ -80,7 +80,7 @@ OLD_ALIASES = {
     'Repas & gourmandises': ['Les repas & courses', 'Repas & gourmandises'],
 }
 
-FALLBACK_IMAGE = '/static/images/lofoten.png'
+FALLBACK_IMAGE = '/static/images/lofoten.jpg'
 
 def ensure_schema():
     inspector = inspect(db.engine)
