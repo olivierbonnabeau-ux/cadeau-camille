@@ -1,0 +1,54 @@
+name: Mise à jour carte et programme
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Modifier carte et programme
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('templates/index.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace("Oslo:[59.9139,10.7522],Quest:[69.78,20.05]","Oslo:[59.9139,10.7522],Quest:[69.87470296806181,19.87056593342515]")
+          s=s.replace("A:[67.8797,12.9822]","A:[67.8796,12.9840]")
+          old="var cruiseLine=L.polyline([points.Tromso,[69.66,19.25],[69.72,19.55],[69.75,19.85],points.Quest],{color:'#6d19d9',weight:4,lineCap:'round',lineJoin:'round'}).addTo(groups.cruise);"
+          new="var cruiseLine=L.polyline([points.Tromso,[69.655,19.02],[69.67,19.18],[69.72,19.38],[69.79,19.56],[69.84,19.72],points.Quest],{color:'#6d19d9',weight:4,lineCap:'round',lineJoin:'round'}).addTo(groups.cruise);"
+          if old not in s: raise SystemExit('Ligne croisière introuvable')
+          s=s.replace(old,new)
+          a=s.index('  <aside class="travel-itinerary">'); b=s.index('  </aside>',a)+len('  </aside>')
+          aside='''  <aside class="travel-itinerary">
+      <h3>🗓️ Le programme</h3>
+      <div class="travel-step"><b>7–8 jan. · Tromsø</b><small>Vol direct CDG → TOS 09:10–13:05. Installation puis découverte libre de Tromsø et possibilité d’aurores.</small></div>
+      <div class="travel-step"><b>9–10 jan. · Croisière arctique</b><small>Départ 19:00 de Tromsø. 24 h en mer : safari baleine + aurores, cabine double, combinaison thermique, dîner, petit-déjeuner et déjeuner inclus. Retour vers 18:00–19:00.</small></div>
+      <div class="travel-step"><b>11 jan. · Tromsø → Lofoten</b><small>Vol 11:40 → 12:40 vers Bodø, puis ferry piéton 16:00 → 20:00 vers Moskenes et bus vers Sakrisøy.</small></div>
+      <div class="travel-step"><b>12–13 jan. · Les îles Lofoten</b><small>Découverte de Sakrisøy, Reine, Hamnøy et des paysages de fjords et de montagnes. Aurores possibles selon la météo.</small></div>
+      <div class="travel-step"><b>13 jan. · Cabane à Å</b><small>Studio 23 m², cuisine privée, salle de bain, entrée privée, patio et vue mer + montagne.</small></div>
+      <div class="travel-step"><b>14–16 jan. · Oslo</b><small>06:25 Å → Moskenes, ferry 08:00 → Bodø, vol 17:50 → Oslo. Trois nuits puis deux journées libres pour découvrir la capitale.</small></div>
+      <div class="travel-step"><b>17 jan. · Retour</b><small>Norwegian Oslo → Paris CDG, 09:00 → 11:25. Fin de l’aventure.</small></div>
+    </aside>'''
+          s=s[:a]+aside+s[b:]
+          s=s.replace('.travel-map-grid{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(250px,.7fr);gap:12px}','.travel-map-grid{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(330px,.95fr);gap:12px}')
+          s=s.replace('.travel-itinerary{background:#081923;border:1px solid var(--line);border-radius:18px;padding:15px;max-height:560px;overflow:auto}','.travel-itinerary{background:#081923;border:1px solid var(--line);border-radius:18px;padding:18px;max-height:700px;overflow:auto}')
+          s=s.replace('#travel-map{height:560px','#travel-map{height:700px')
+          s=s.replace('.travel-step{padding:9px 0;border-bottom:1px solid #294452;font-size:13px;line-height:1.35}','.travel-step{padding:12px 0;border-bottom:1px solid #294452;font-size:14px;line-height:1.45}.travel-step b{display:block;font-size:15px;margin-bottom:4px}.travel-step small{font-size:13px;line-height:1.45}')
+          marker='<section><h2 class="sectiontitle">🗓️ Le programme</h2>'
+          a=s.index(marker); b=s.index('<section><h2 class="sectiontitle">💰 Où va le cadeau ?',a)
+          s=s[:a]+s[b:]
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit puis supprimer le workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add templates/index.html .github/workflows/update-map-program.yml
+          git commit -m "Corrige carte et intègre le programme" || exit 0
+          git push
+          git rm .github/workflows/update-map-program.yml
+          git commit -m "Supprime le workflow temporaire"
+          git push
