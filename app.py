@@ -69,7 +69,7 @@ OLD_ALIASES = {
 
 PROMISES = {
     'Croisière Aurore Boréale et Safari Baleine': 'Une photo en exclusivité des aurores boréales.',
-    'Avion': 'Camille devra aller au travail en hiver pour rattraper son empreinte carbone.',
+    'Avion': 'Camille devra aller au travail en vélo cet hiver pour rattraper son empreinte carbone.',
     'Tromsø': 'Camille vous enverra une carte postale de l’endroit le plus au nord de la Planète.',
     'Les îles Lofoten': 'Camille devra prononcer 3 fois correctement Kjærlighet devant vous.',
     "S'endormir sous les aurores boréales dans des cabanes au bout du monde": 'Vous envoyez une photo de la vue, sans se la raconter.',
@@ -144,7 +144,7 @@ def final_frontend_fixes(response):
     'Repas & gourmandises':330
   };
   var activityPromises={
-    'Avion':'Camille devra aller au travail en hiver pour rattraper son empreinte carbone.',
+    'Avion':'Camille devra aller au travail en vélo cet hiver pour rattraper son empreinte carbone.',
     'Tromsø':'Camille vous enverra une carte postale de l’endroit le plus au nord de la Planète.',
     'Croisière Aurore Boréale et Safari Baleine':'Une photo en exclusivité des aurores boréales.',
     'Les îles Lofoten':'Camille devra prononcer 3 fois correctement Kjærlighet devant vous.',
@@ -259,96 +259,40 @@ def total_pledges():
 def images_for(activity):
     return IMAGE_MAP.get(activity.title, [FALLBACK_IMAGE])
 
-def image_for(activity):
-    return images_for(activity)[0]
-
 @app.route('/')
 def home():
-    acts = Activity.query.filter_by(active=True).order_by(Activity.sort_order, Activity.id).all()
+    activities = Activity.query.filter_by(active=True).order_by(Activity.sort_order).all()
     total = total_pledges()
-    messages = Pledge.query.order_by(Pledge.created_at.desc()).limit(30).all()
-    return render_template('index.html', activities=acts, total=total, goal=1531.5, messages=messages, image_for=image_for, images_for=images_for, promises=PROMISES)
+    goal = 1531.5
+    return render_template('index.html', activities=activities, total=total, goal=goal, images_for=images_for, promises=PROMISES)
 
-@app.post('/promesse')
+@app.route('/pledge', methods=['POST'])
 def pledge():
+    name = request.form.get('name','').strip()
+    contact = request.form.get('contact','').strip()
+    message = request.form.get('message','').strip()
+    amount_raw = request.form.get('amount','').strip().replace(',','.')
+    activity_id = request.form.get('activity_id')
+    if not name or not contact or not amount_raw or not activity_id:
+        flash('Merci de remplir tous les champs obligatoires.', 'error')
+        return redirect(url_for('home') + '#promesse')
     try:
-        name = request.form['name'].strip()
-        contact = request.form['contact'].strip()
-        amount = float(request.form['amount'])
-        activity_id = int(request.form['activity_id'])
-        message = request.form.get('message', '').strip()
-        public_message = request.form.get('public_message') == 'on'
-        if not name or not contact or amount <= 0:
-            raise ValueError()
-        activity = Activity.query.get_or_404(activity_id)
-        if activity.title == 'Croisière Aurore Boréale et Safari Baleine':
-            flash('La croisière est offerte par Olivier et ne fait pas partie de la cagnotte.', 'error')
-            return redirect(url_for('home') + '#promesse')
-        db.session.add(Pledge(activity=activity, name=name, contact=contact, amount=amount, message=message, public_message=public_message))
-        db.session.commit()
-        flash('Merci pour elle ! Votre don a bien été enregistré, on se recontacte quand nous procéderons aux réservations pour que Camille puisse récupérer sa part.', 'success')
-    except Exception:
-        db.session.rollback()
-        flash('Impossible d’enregistrer la promesse. Vérifie les informations.', 'error')
+        amount = float(amount_raw)
+    except ValueError:
+        flash('Le montant indiqué n’est pas valide.', 'error')
+        return redirect(url_for('home') + '#promesse')
+    activity = db.session.get(Activity, int(activity_id))
+    if not activity or not activity.active:
+        flash('Cette activité n’est plus disponible.', 'error')
+        return redirect(url_for('home') + '#promesse')
+    if activity.title == 'Croisière Aurore Boréale et Safari Baleine':
+        flash('La croisière est offerte séparément par Olivier et ne peut pas faire l’objet d’une promesse de don.', 'error')
+        return redirect(url_for('home') + '#promesse')
+    db.session.add(Pledge(activity_id=activity.id, name=name, contact=contact, amount=amount, message=message, public_message=True))
+    db.session.commit()
+    flash('Merci pour elle ! Votre don a bien été enregistré, on se recontacte quand nous procéderons aux réservations pour que Camille puisse récupérer sa part.', 'success')
     return redirect(url_for('home') + '#promesse')
 
-@app.route('/admin/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        if secrets.compare_digest(request.form.get('password', ''), os.environ.get('ADMIN_PASSWORD', 'camille30')):
-            session['admin'] = True
-            return redirect(url_for('admin'))
-        flash('Mot de passe incorrect.', 'error')
-    return render_template('login.html')
-
-@app.get('/admin/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('home'))
-
-@app.route('/admin', methods=['GET', 'POST'])
-def admin():
-    if not admin_ok():
-        return redirect(url_for('login'))
-    if request.method == 'POST':
-        action = request.form.get('action')
-        if action == 'delete':
-            p = Pledge.query.get_or_404(int(request.form['id']))
-            db.session.delete(p)
-            db.session.commit()
-            flash('Promesse supprimée.', 'success')
-        elif action == 'status':
-            p = Pledge.query.get_or_404(int(request.form['id']))
-            p.status = request.form.get('status', 'promesse')
-            db.session.commit()
-        elif action == 'public_message':
-            p = Pledge.query.get_or_404(int(request.form['id']))
-            p.public_message = request.form.get('public') == '1'
-            db.session.commit()
-            flash('Visibilité du message mise à jour.', 'success')
-        elif action == 'activity':
-            a = Activity.query.get_or_404(int(request.form['id']))
-            a.title = request.form['title'].strip()
-            a.description = request.form['description'].strip()
-            a.target = float(request.form['target'])
-            a.active = 'active' in request.form
-            db.session.commit()
-        return redirect(url_for('admin'))
-    pledges = Pledge.query.order_by(Pledge.created_at.desc()).all()
-    acts = Activity.query.order_by(Activity.sort_order, Activity.id).all()
-    public_messages = Pledge.query.filter(Pledge.public_message.is_(True), Pledge.message.isnot(None), Pledge.message != '').order_by(Pledge.created_at.desc()).all()
-    return render_template('admin.html', pledges=pledges, activities=acts, public_messages=public_messages, total=total_pledges(), goal=1531.5, image_for=image_for)
-
-@app.get('/admin/export.csv')
-def export_csv():
-    if not admin_ok():
-        return redirect(url_for('login'))
-    out = io.StringIO()
-    w = csv.writer(out)
-    w.writerow(['Date', 'Nom', 'Contact', 'Activité', 'Montant', 'Statut', 'Message', 'Message public'])
-    for p in Pledge.query.order_by(Pledge.created_at).all():
-        w.writerow([p.created_at.isoformat(), p.name, p.contact, p.activity.title if p.activity else '', p.amount, p.status, p.message, 'Oui' if p.public_message else 'Non'])
-    return Response('\ufeff' + out.getvalue(), mimetype='text/csv', headers={'Content-Disposition': 'attachment; filename=promesses-camille.csv'})
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
