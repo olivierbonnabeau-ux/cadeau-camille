@@ -36,21 +36,21 @@ class Pledge(db.Model):
 
 ACTIVITIES = [
     ('✈️', 'Avion', 'Les vols de l’aventure : Paris → Tromsø → Bodø → Oslo → Paris.', 256),
-    ('🌌', 'Tromsø', 'Trois nuits à Tromsø pour découvrir la ville, le port, les cafés et profiter des possibilités d’aurores.', 380),
+    ('🌌', 'Tromsø', 'Trois nuits à Tromsø pour découvrir la ville, le port, les cafés et profiter des possibilités d’aurores boréales.', 380),
     ('🐋', 'Croisière Aurore Boréale et Safari Baleine', '24 h en mer : safari baleine, recherche d’aurores, cabine double, dîner, petit-déjeuner et déjeuner inclus. Reste offert par Olivier.', 1215),
-    ('🏔️', 'Les îles Lofoten', 'Découvrez Sakrisøy, Reine, Hamnøy, les fjords et les montagnes qui plongent dans la mer.', 192.50),
-    ('🛖', "S'endormir sous les aurores boréales dans des cabanes au bout du monde", 'Cabin 1 à Å : studio 23 m², cuisine privée, salle de bain, entrée privée, patio et vue mer + montagne.', 173.50),
-    ('⛴️', 'Traversée Bodø → Moskenes', 'Traversée piétonne Bodø → Moskenes. Budget prévu : 0 € ; réservation de siège facultative à 65 NOK par personne.', 0),
+    ('🏔️', 'Les îles Lofoten', 'Découverte de Sakrisøy, Reine, Hamnøy, des fjords et des montagnes qui plongent dans la mer.', 192.50),
+    ('🛖', "S'endormir sous les aurores boréales dans des cabanes au bout du monde", 'Cabine vitrée à Å : patio et vue mer + montagne + Façade vitrée pour les aurores boréales.', 173.50),
+    ('⛴️', 'Traversée Bodø → Moskenes', 'Traversée piétonne Bodø → Moskenes.', 39),
     ('🏙️', 'Oslo', 'Après notre périple dans le Grand Nord, nous poserons nos valises à Oslo pour profiter de la capitale et terminer ce voyage en douceur.', 160),
     ('🍽️', 'Repas & gourmandises', 'Des spécialités norvégiennes végétariennes, des repas chauds, des gaufres au brunost, des brioches à la cannelle et quelques gourmandises locales.', 330),
 ]
 
 IMAGE_MAP = {
     'Avion': ['/static/images/avion.png'],
-    'Tromsø': ['/static/images/tromso.png'],
+    'Tromsø': ['/static/images/tromso.png', '/static/images/tromso_01.jpeg', '/static/images/tromso_02.jpeg'],
     'Croisière Aurore Boréale et Safari Baleine': ['/static/images/quest.png', '/static/images/orca.png', '/static/images/aurora.png'],
-    'Les îles Lofoten': ['/static/images/lofoten.png'],
-    "S'endormir sous les aurores boréales dans des cabanes au bout du monde": ['/static/images/cabin.png'],
+    'Les îles Lofoten': ['/static/images/lofoten.png', '/static/images/lofoten_01.jpeg', '/static/images/lofoten_02.jpeg'],
+    "S'endormir sous les aurores boréales dans des cabanes au bout du monde": ['/static/images/cabin.png', '/static/images/cabane_aa_01.jpeg', '/static/images/cabane_aa_02.jpeg', '/static/images/cabane_aa_03.jpeg'],
     'Traversée Bodø → Moskenes': ['/static/images/ferry.png'],
     'Oslo': ['/static/images/oslo_palace.png', '/static/images/oslo_port.png', 'https://imageio.forbes.com/specials-images/imageserve/67780d31ab136252656d799b/0x0.jpg?fit=bounds&format=jpg&height=900&width=1600'],
     'Repas & gourmandises': ['/static/images/waffles.png', '/static/images/kanelboller.png', '/static/images/lefse.png', '/static/images/rommegrot.png', '/static/images/lefse_savory.png', '/static/images/sandwich.png', '/static/images/potatoes_mushrooms.png'],
@@ -68,14 +68,14 @@ OLD_ALIASES = {
 }
 
 PROMISES = {
-    'Croisière Aurore Boréale et Safari Baleine': 'Une photo de la croisière, des baleines ou des aurores, avec quelques nouvelles de cette aventure en mer.',
-    'Avion': 'Une photo du départ ou de l’arrivée à Tromsø avec un petit message personnalisé rien que pour toi.',
-    'Tromsø': 'Une jolie photo de Tromsø accompagnée de quelques nouvelles de ses premières découvertes.',
-    'Les îles Lofoten': 'Une photo des Lofoten choisie par Camille avec un petit mot personnalisé depuis l’archipel.',
+    'Croisière Aurore Boréale et Safari Baleine': 'Une photo en exclusivité des aurores boréales.',
+    'Avion': 'Camille devra aller au travail en hiver pour rattraper son empreinte carbone.',
+    'Tromsø': 'Camille vous enverra une carte postale de l’endroit le plus au nord de la Planète.',
+    'Les îles Lofoten': 'Camille devra prononcer 3 fois correctement Kjærlighet devant vous.',
     "S'endormir sous les aurores boréales dans des cabanes au bout du monde": 'Une photo depuis la cabane ou de sa vue, accompagnée d’un message rien que pour toi.',
-    'Traversée Bodø → Moskenes': 'Une photo de la traversée vers les Lofoten et un petit récit de ce passage vers l’archipel.',
-    'Oslo': 'Une photo d’Oslo et les dernières nouvelles de l’aventure avant le retour.',
-    'Repas & gourmandises': 'Une photo d’un repas ou d’une gourmandise découverte pendant le voyage, avec les impressions de Camille.',
+    'Traversée Bodø → Moskenes': 'Camille vous chantera une petite chanson de marin norvégienne !',
+    'Oslo': 'Camille vous fera écouter sa chanson norvégienne préférée du voyage.',
+    'Repas & gourmandises': 'Camille mangera à votre santé sa gourmandise norvégienne préférée du voyage',
 }
 
 FALLBACK_IMAGE = '/static/images/lofoten.png'
@@ -139,19 +139,19 @@ def final_frontend_fixes(response):
     'Croisière Aurore Boréale et Safari Baleine':1215,
     'Les îles Lofoten':192.50,
     "S'endormir sous les aurores boréales dans des cabanes au bout du monde":173.50,
-    'Traversée Bodø → Moskenes':0,
+    'Traversée Bodø → Moskenes':39,
     'Oslo':160,
     'Repas & gourmandises':330
   };
   var activityPromises={
-    'Avion':'Une photo du départ ou de l’arrivée à Tromsø avec un petit message personnalisé rien que pour toi.',
-    'Tromsø':'Une jolie photo de Tromsø accompagnée de quelques nouvelles de ses premières découvertes.',
-    'Croisière Aurore Boréale et Safari Baleine':'Une photo de la croisière, des baleines ou des aurores, avec quelques nouvelles de cette aventure en mer.',
-    'Les îles Lofoten':'Une photo des Lofoten choisie par Camille avec un petit mot personnalisé depuis l’archipel.',
+    'Avion':'Camille devra aller au travail en hiver pour rattraper son empreinte carbone.',
+    'Tromsø':'Camille vous enverra une carte postale de l’endroit le plus au nord de la Planète.',
+    'Croisière Aurore Boréale et Safari Baleine':'Une photo en exclusivité des aurores boréales.',
+    'Les îles Lofoten':'Camille devra prononcer 3 fois correctement Kjærlighet devant vous.',
     "S'endormir sous les aurores boréales dans des cabanes au bout du monde":'Une photo depuis la cabane ou de sa vue, accompagnée d’un message rien que pour toi.',
-    'Traversée Bodø → Moskenes':'Une photo de la traversée vers les Lofoten et un petit récit de ce passage vers l’archipel.',
-    'Oslo':'Une photo d’Oslo et les dernières nouvelles de l’aventure avant le retour.',
-    'Repas & gourmandises':'Une photo d’un repas ou d’une gourmandise découverte pendant le voyage, avec les impressions de Camille.'
+    'Traversée Bodø → Moskenes':'Camille vous chantera une petite chanson de marin norvégienne !',
+    'Oslo':'Camille vous fera écouter sa chanson norvégienne préférée du voyage.',
+    'Repas & gourmandises':'Camille mangera à votre santé sa gourmandise norvégienne préférée du voyage'
   };
   function getSelectedTitle(){
     var select=document.querySelector('select[name="activity_id"],#activity');
@@ -267,7 +267,7 @@ def home():
     acts = Activity.query.filter_by(active=True).order_by(Activity.sort_order, Activity.id).all()
     total = total_pledges()
     messages = Pledge.query.order_by(Pledge.created_at.desc()).limit(30).all()
-    return render_template('index.html', activities=acts, total=total, goal=1492.5, messages=messages, image_for=image_for, images_for=images_for, promises=PROMISES)
+    return render_template('index.html', activities=acts, total=total, goal=1531.5, messages=messages, image_for=image_for, images_for=images_for, promises=PROMISES)
 
 @app.post('/promesse')
 def pledge():
@@ -337,7 +337,7 @@ def admin():
     pledges = Pledge.query.order_by(Pledge.created_at.desc()).all()
     acts = Activity.query.order_by(Activity.sort_order, Activity.id).all()
     public_messages = Pledge.query.filter(Pledge.public_message.is_(True), Pledge.message.isnot(None), Pledge.message != '').order_by(Pledge.created_at.desc()).all()
-    return render_template('admin.html', pledges=pledges, activities=acts, public_messages=public_messages, total=total_pledges(), goal=1492.5, image_for=image_for)
+    return render_template('admin.html', pledges=pledges, activities=acts, public_messages=public_messages, total=total_pledges(), goal=1531.5, image_for=image_for)
 
 @app.get('/admin/export.csv')
 def export_csv():
