@@ -13,6 +13,7 @@ Application Flask + SQLAlchemy pour la cagnotte participative du voyage du 7 au 
 - Galeries photos intégrées pour la croisière, Oslo et les repas.
 - Photos fournies par l'utilisateur copiées dans `static/images/`.
 - Prévisualisation statique disponible dans `preview.html`.
+- Carte interactive open source Leaflet + OpenStreetMap intégrée.
 
 ## Local
 
