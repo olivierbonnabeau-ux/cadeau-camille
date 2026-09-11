@@ -1,0 +1,30 @@
+name: Final fix
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('app.py'); s=p.read_text(encoding='utf-8')
+          s=s.replace("\"S'endormir sous les aurores boréales dans des cabanes au bout du monde\": 'Une photo depuis la cabane ou de sa vue, accompagnée d’un message rien que pour toi.'", "\"S'endormir sous les aurores boréales dans des cabanes au bout du monde\": 'Vous envoyez une photo de la vue, sans se la raconter.'")
+          s=s.replace("\"S'endormir sous les aurores boréales dans des cabanes au bout du monde\":'Une photo depuis la cabane ou de sa vue, accompagnée d’un message rien que pour toi.'", "\"S'endormir sous les aurores boréales dans des cabanes au bout du monde\":'Vous envoyez une photo de la vue, sans se la raconter.'")
+          s=s.replace("'S'endormir sous les aurores boréales dans des cabanes au bout du monde': 'Une photo depuis la cabane ou de sa vue, accompagnée d’un message rien que pour toi.'", "'S'endormir sous les aurores boréales dans des cabanes au bout du monde': 'Vous envoyez une photo de la vue, sans se la raconter.'")
+          p.write_text(s,encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app.py
+          git commit -m 'Corrige la promesse de la cabane' || true
+          git push
+          rm .github/workflows/final-fix.yml
+          git add .github/workflows/final-fix.yml
+          git commit -m 'Supprime le workflow temporaire' || true
+          git push
