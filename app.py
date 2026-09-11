@@ -70,6 +70,7 @@ OLD_ALIASES = {
 PROMISES = {
     'Avion': 'Une photo du départ ou de l’arrivée à Tromsø avec un petit message personnalisé rien que pour toi.',
     'Tromsø': 'Une jolie photo de Tromsø accompagnée de quelques nouvelles de ses premières découvertes.',
+    'Croisière Aurore Boréale et Safari Baleine': 'Une photo de la croisière, des baleines ou des aurores, avec quelques nouvelles de cette aventure en mer.',
     'Les îles Lofoten': 'Une photo des Lofoten choisie par Camille avec un petit mot personnalisé depuis l’archipel.',
     "S'endormir sous les aurores boréales dans des cabanes au bout du monde": 'Une photo depuis la cabane ou de sa vue, accompagnée d’un message rien que pour toi.',
     'Traversée Bodø → Moskenes': 'Une photo de la traversée vers les Lofoten et un petit récit de ce passage vers l’archipel.',
@@ -128,7 +129,7 @@ def admin_ok():
     return session.get('admin') is True
 
 def total_pledges():
-    return db.session.query(func.coalesce(func.sum(Pledge.amount), 0)).join(Activity, Pledge.activity_id == Activity.id).filter(Activity.active.is_(True)).scalar() or 0
+    return db.session.query(func.coalesce(func.sum(Pledge.amount), 0)).join(Activity, Pledge.activity_id == Activity.id).filter(Activity.active.is_(True), Activity.title != 'Croisière Aurore Boréale et Safari Baleine').scalar() or 0
 
 def images_for(activity):
     return IMAGE_MAP.get(activity.title, [FALLBACK_IMAGE])
@@ -141,7 +142,7 @@ def home():
     acts = Activity.query.filter_by(active=True).order_by(Activity.sort_order, Activity.id).all()
     total = total_pledges()
     messages = Pledge.query.filter(Pledge.public_message.is_(True), Pledge.message.isnot(None), Pledge.message != '').order_by(Pledge.created_at.desc()).limit(30).all()
-    return render_template('index.html', activities=acts, total=total, goal=2400, messages=messages, image_for=image_for, images_for=images_for, promises=PROMISES)
+    return render_template('index.html', activities=acts, total=total, goal=1492.5, messages=messages, image_for=image_for, images_for=images_for, promises=PROMISES)
 
 @app.post('/promesse')
 def pledge():
@@ -155,6 +156,9 @@ def pledge():
         if not name or not contact or amount <= 0:
             raise ValueError()
         activity = Activity.query.get_or_404(activity_id)
+        if activity.title == 'Croisière Aurore Boréale et Safari Baleine':
+            flash('La croisière est offerte par Olivier et ne fait pas partie de la cagnotte.', 'error')
+            return redirect(url_for('home') + '#promesse')
         db.session.add(Pledge(activity=activity, name=name, contact=contact, amount=amount, message=message, public_message=public_message))
         db.session.commit()
         flash('Merci ! Ta promesse a bien été enregistrée. ❤️', 'success')
@@ -208,7 +212,7 @@ def admin():
     pledges = Pledge.query.order_by(Pledge.created_at.desc()).all()
     acts = Activity.query.order_by(Activity.sort_order, Activity.id).all()
     public_messages = Pledge.query.filter(Pledge.public_message.is_(True), Pledge.message.isnot(None), Pledge.message != '').order_by(Pledge.created_at.desc()).all()
-    return render_template('admin.html', pledges=pledges, activities=acts, public_messages=public_messages, total=total_pledges(), goal=2400, image_for=image_for)
+    return render_template('admin.html', pledges=pledges, activities=acts, public_messages=public_messages, total=total_pledges(), goal=1492.5, image_for=image_for)
 
 @app.get('/admin/export.csv')
 def export_csv():
