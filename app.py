@@ -72,7 +72,7 @@ PROMISES = {
     'Avion': 'Camille devra aller au travail en hiver pour rattraper son empreinte carbone.',
     'Tromsø': 'Camille vous enverra une carte postale de l’endroit le plus au nord de la Planète.',
     'Les îles Lofoten': 'Camille devra prononcer 3 fois correctement Kjærlighet devant vous.',
-    "S'endormir sous les aurores boréales dans des cabanes au bout du monde": 'Une photo depuis la cabane ou de sa vue, accompagnée d’un message rien que pour toi.',
+    "S'endormir sous les aurores boréales dans des cabanes au bout du monde": 'Vous envoyez une photo de la vue, sans se la raconter.',
     'Traversée Bodø → Moskenes': 'Camille vous chantera une petite chanson de marin norvégienne !',
     'Oslo': 'Camille vous fera écouter sa chanson norvégienne préférée du voyage.',
     'Repas & gourmandises': 'Camille mangera à votre santé sa gourmandise norvégienne préférée du voyage',
@@ -148,7 +148,7 @@ def final_frontend_fixes(response):
     'Tromsø':'Camille vous enverra une carte postale de l’endroit le plus au nord de la Planète.',
     'Croisière Aurore Boréale et Safari Baleine':'Une photo en exclusivité des aurores boréales.',
     'Les îles Lofoten':'Camille devra prononcer 3 fois correctement Kjærlighet devant vous.',
-    "S'endormir sous les aurores boréales dans des cabanes au bout du monde":'Une photo depuis la cabane ou de sa vue, accompagnée d’un message rien que pour toi.',
+    "S'endormir sous les aurores boréales dans des cabanes au bout du monde":'Vous envoyez une photo de la vue, sans se la raconter.',
     'Traversée Bodø → Moskenes':'Camille vous chantera une petite chanson de marin norvégienne !',
     'Oslo':'Camille vous fera écouter sa chanson norvégienne préférée du voyage.',
     'Repas & gourmandises':'Camille mangera à votre santé sa gourmandise norvégienne préférée du voyage'
