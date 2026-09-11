@@ -264,7 +264,8 @@ def home():
     activities = Activity.query.filter_by(active=True).order_by(Activity.sort_order).all()
     total = total_pledges()
     goal = 1531.5
-    return render_template('index.html', activities=activities, total=total, goal=goal, image_for=lambda a: images_for(a)[0], images_for=images_for, promises=PROMISES)
+    messages = Pledge.query.filter(Pledge.public_message.is_(True), Pledge.message.isnot(None), Pledge.message != '').order_by(Pledge.created_at.desc()).all()
+    return render_template('index.html', activities=activities, total=total, goal=goal, image_for=lambda a: images_for(a)[0], images_for=images_for, promises=PROMISES, messages=messages)
 
 @app.route('/pledge', methods=['POST'])
 def pledge():
@@ -292,6 +293,90 @@ def pledge():
     db.session.commit()
     flash('Merci pour elle ! Votre don a bien été enregistré, on se recontacte quand nous procéderons aux réservations pour que Camille puisse récupérer sa part.', 'success')
     return redirect(url_for('home') + '#promesse')
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        password = request.form.get('password', '')
+        expected = os.environ.get('ADMIN_PASSWORD', '')
+        if expected and secrets.compare_digest(password, expected):
+            session['admin'] = True
+            return redirect(url_for('admin'))
+        flash('Mot de passe incorrect.', 'error')
+    return render_template('login.html')
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin', None)
+    return redirect(url_for('admin_login'))
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    if not admin_ok():
+        return redirect(url_for('admin_login'))
+
+    if request.method == 'POST':
+        action = request.form.get('action', '')
+        pledge_id = request.form.get('id')
+
+        if action == 'delete' and pledge_id:
+            pledge = db.session.get(Pledge, int(pledge_id))
+            if pledge:
+                db.session.delete(pledge)
+                db.session.commit()
+                flash('Promesse supprimée.', 'success')
+
+        elif action == 'status' and pledge_id:
+            pledge = db.session.get(Pledge, int(pledge_id))
+            if pledge:
+                pledge.status = request.form.get('status', 'promesse')
+                db.session.commit()
+                flash('Statut mis à jour.', 'success')
+
+        elif action == 'public_message' and pledge_id:
+            pledge = db.session.get(Pledge, int(pledge_id))
+            if pledge:
+                pledge.public_message = request.form.get('public') == '1'
+                db.session.commit()
+                flash('Visibilité du message mise à jour.', 'success')
+
+        elif action == 'activity' and request.form.get('id'):
+            activity = db.session.get(Activity, int(request.form['id']))
+            if activity:
+                activity.title = request.form.get('title', activity.title).strip()
+                activity.description = request.form.get('description', activity.description).strip()
+                try:
+                    activity.target = float(request.form.get('target', activity.target))
+                except ValueError:
+                    pass
+                activity.active = request.form.get('active') == 'on'
+                db.session.commit()
+                flash('Activité mise à jour.', 'success')
+
+        return redirect(url_for('admin'))
+
+    pledges = Pledge.query.order_by(Pledge.created_at.desc()).all()
+    public_messages = Pledge.query.filter(Pledge.public_message.is_(True), Pledge.message.isnot(None), Pledge.message != '').order_by(Pledge.created_at.desc()).all()
+    activities = Activity.query.order_by(Activity.sort_order).all()
+    total = total_pledges()
+    return render_template('admin.html', pledges=pledges, public_messages=public_messages, activities=activities, total=total)
+
+@app.route('/admin/export.csv')
+def admin_export():
+    if not admin_ok():
+        return redirect(url_for('admin_login'))
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Date', 'Participant', 'Contact', 'Activité', 'Montant', 'Statut', 'Message', 'Public'])
+    for p in Pledge.query.order_by(Pledge.created_at.desc()).all():
+        writer.writerow([
+            p.created_at.strftime('%d/%m/%Y %H:%M') if p.created_at else '',
+            p.name, p.contact,
+            p.activity.title if p.activity else '',
+            f'{p.amount:.2f}', p.status or '', p.message or '',
+            'oui' if p.public_message else 'non'
+        ])
+    return Response(output.getvalue(), mimetype='text/csv; charset=utf-8', headers={'Content-Disposition': 'attachment; filename=promesses_camille.csv'})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
