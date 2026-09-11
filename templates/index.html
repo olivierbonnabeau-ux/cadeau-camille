@@ -78,7 +78,7 @@
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
     var groups={flight:L.layerGroup().addTo(map),boat:L.layerGroup().addTo(map),cruise:L.layerGroup().addTo(map),hotel:L.layerGroup().addTo(map),bus:L.layerGroup().addTo(map)};
     var points={
-      Paris:[48.8566,2.3522],Tromso:[69.6492,18.9553],Bodo:[67.2804,14.4049],Moskenes:[67.8989,13.0460],Sakrisoy:[67.8970,13.0095],Reine:[67.9325,13.0896],Hamoy:[67.9453,13.2837],A:[67.8797,12.9822],Oslo:[59.9139,10.7522],Quest:[69.72,18.55]
+      Paris:[48.8566,2.3522],Tromso:[69.6492,18.9553],Bodo:[67.2804,14.4049],Moskenes:[67.8989,13.0460],Sakrisoy:[67.94103,13.10997],Reine:[67.9325,13.0896],Hamoy:[67.94556,13.13167],A:[67.8797,12.9822],Oslo:[59.9139,10.7522],Quest:[69.78,20.05]
     };
     function pin(type,emoji){return L.divIcon({className:'',html:'<div class="travel-pin '+type+'">'+emoji+'</div>',iconSize:[34,34],iconAnchor:[17,17]});}
     function marker(type,key,emoji,title,html){return L.marker(points[key],{icon:pin(type,emoji)}).bindPopup('<div class="travel-popup"><b>'+title+'</b><br>'+html+'</div>').addTo(groups[type]);}
@@ -92,7 +92,7 @@
     marker('hotel','Sakrisoy','🏨','Sakrisøy Gjestegård','11–13 jan.');
     marker('hotel','A','🏨','Cabin 1 · Å','13–14 jan.');
     marker('hotel','Oslo','🏨','Appartement Oslo','14–17 jan.');
-    marker('cruise','Quest','🐋','MV Quest','9–10 jan. · 24 h en mer');
+    marker('cruise','Quest','🐋','MV Quest','9–10 jan. · zone arctique baleines / aurores');
     marker('bus','Moskenes','🚌','Moskenes','Bus vers Reine / Hamnøy / Å');
     marker('bus','Reine','🚌','Reine','Étape Lofoten');
     marker('bus','Hamoy','🚌','Hamnøy','Étape Lofoten');
@@ -100,8 +100,8 @@
     var flightLine=L.polyline([points.Paris,points.Tromso,points.Bodo,points.Oslo,points.Paris],{color:'#239bd2',weight:3,dashArray:'8 7'}).addTo(groups.flight);
     var boat1=L.polyline([points.Bodo,points.Moskenes],{color:'#d74352',weight:4}).addTo(groups.boat);
     var boat2=L.polyline([points.Moskenes,points.Bodo],{color:'#d74352',weight:4,dashArray:'8 7'}).addTo(groups.boat);
-    var cruiseLine=L.polyline([points.Tromso,points.Quest],{color:'#a96bd4',weight:3,dashArray:'5 6'}).addTo(groups.cruise);
-    var busLine=L.polyline([points.A,points.Moskenes,points.Reine,points.Hamoy],{color:'#e5b52d',weight:3,dashArray:'5 6'}).addTo(groups.bus);
+    var cruiseLine=L.polyline([points.Tromso,[69.66,19.25],[69.72,19.55],[69.75,19.85],points.Quest],{color:'#6d19d9',weight:4,lineCap:'round',lineJoin:'round'}).addTo(groups.cruise);
+    var busLine=L.polyline([points.A,points.Reine,points.Sakrisoy,points.Hamoy,points.Moskenes],{color:'#e5b52d',weight:3,dashArray:'5 6'}).addTo(groups.bus);
     map.fitBounds(L.latLngBounds(Object.values(points)),{padding:[25,25]});
     document.querySelectorAll('[data-map-filter]').forEach(function(btn){btn.addEventListener('click',function(){var t=btn.getAttribute('data-map-filter');var on=btn.classList.toggle('active');if(on) groups[t].addTo(map);else map.removeLayer(groups[t]);});});
     setTimeout(function(){map.invalidateSize();},200);
