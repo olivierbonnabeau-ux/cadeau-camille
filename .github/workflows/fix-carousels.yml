@@ -1,6 +1,8 @@
 name: Fix activity photo carousels
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -17,14 +19,12 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-
           path = Path('templates/index.html')
           text = path.read_text(encoding='utf-8')
           marker = '<!-- ACTIVITY-CAROUSELS-FIX -->'
           if marker in text:
               print('Carousel patch already present')
               raise SystemExit(0)
-
           patch = r'''<!-- ACTIVITY-CAROUSELS-FIX -->
           <script>
           (function(){
@@ -46,43 +46,35 @@ jobs:
                 ['/static/images/cabane_aa_03.jpeg','Cabane à Å — photo 4']
               ]
             };
-
             function titleFromCard(card){
               var h=card.querySelector('h3');
               if(!h) return '';
               return (h.textContent||'').trim().replace(/^[^A-Za-zÀ-ÿ0-9]+\s*/,'');
             }
-
-            function buildGallery(card, title, items, key){
+            function buildGallery(card, items, key){
               var old=card.querySelector('.media');
               if(!old || card.querySelector('[data-gallery="'+key+'"]')) return;
               var g=document.createElement('div');
               g.className='gallery';
               g.setAttribute('data-gallery',key);
               g.dataset.index='0';
-
               items.forEach(function(item,i){
                 var img=document.createElement('img');
-                img.src=item[0];
-                img.alt=item[1];
+                img.src=item[0]; img.alt=item[1];
                 if(i===0) img.className='active';
                 g.appendChild(img);
               });
-
               var prev=document.createElement('button');
               prev.type='button'; prev.className='arrow prev'; prev.textContent='‹';
               prev.setAttribute('aria-label','Photo précédente');
               prev.onclick=function(){moveGallery(key,-1)};
               g.appendChild(prev);
-
               var next=document.createElement('button');
               next.type='button'; next.className='arrow next'; next.textContent='›';
               next.setAttribute('aria-label','Photo suivante');
               next.onclick=function(){moveGallery(key,1)};
               g.appendChild(next);
-
-              var dots=document.createElement('div');
-              dots.className='dots';
+              var dots=document.createElement('div'); dots.className='dots';
               items.forEach(function(_,i){
                 var dot=document.createElement('span');
                 dot.className='dotg'+(i===0?' active':'');
@@ -94,28 +86,18 @@ jobs:
               g.appendChild(dots);
               old.replaceWith(g);
             }
-
             function init(){
-              var cards=document.querySelectorAll('#activites .activity-card');
-              cards.forEach(function(card){
+              document.querySelectorAll('#activites .activity-card').forEach(function(card){
                 var title=titleFromCard(card);
-                if(galleries[title]){
-                  var key='activity-'+Object.keys(galleries).indexOf(title);
-                  buildGallery(card,title,galleries[title],key);
-                }
+                if(galleries[title]) buildGallery(card,galleries[title],'activity-'+title.replace(/[^a-z0-9]+/gi,'-').toLowerCase());
               });
             }
-
-            if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
-            else init();
+            if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
           })();
           </script>'''
-
           text = text.replace('</body>', patch + '\n</body>', 1)
           path.write_text(text, encoding='utf-8')
-          print('Carousel patch inserted')
           PY
-
       - name: Commit fix and remove temporary workflow
         run: |
           git config user.name "github-actions[bot]"
