@@ -96,7 +96,7 @@
     var flightLine=L.polyline([points.Paris,points.Tromso,points.Bodo,points.Oslo,points.Paris],{color:'#239bd2',weight:3,dashArray:'8 7'}).addTo(groups.flight);
     var boat1=L.polyline([points.Bodo,points.Moskenes],{color:'#d74352',weight:4}).addTo(groups.boat);
     var boat2=L.polyline([points.Moskenes,points.Bodo],{color:'#d74352',weight:4,dashArray:'8 7'}).addTo(groups.boat);
-    var cruiseLine=L.polyline([points.Tromso,[69.655,19.02],[69.67,19.18],[69.72,19.38],[69.79,19.56],[69.84,19.72],points.Quest],{color:'#6d19d9',weight:4,lineCap:'round',lineJoin:'round'}).addTo(groups.cruise);
+    var cruiseLine=L.polyline([points.Tromso,[69.68,19.00],[69.72,19.08],[69.7789,19.1524],[69.82,19.30],[69.84,19.50],[69.86,19.70],points.Quest],{color:'#6d19d9',weight:4,lineCap:'round',lineJoin:'round'}).addTo(groups.cruise);
     var busLine=L.polyline([points.A,points.Reine,points.Sakrisoy,points.Hamoy,points.Moskenes],{color:'#e5b52d',weight:3,dashArray:'5 6'}).addTo(groups.bus);
     map.fitBounds(L.latLngBounds(Object.values(points)),{padding:[25,25]});
     document.querySelectorAll('[data-map-filter]').forEach(function(btn){btn.addEventListener('click',function(){var t=btn.getAttribute('data-map-filter');var on=btn.classList.toggle('active');if(on) groups[t].addTo(map);else map.removeLayer(groups[t]);});});
