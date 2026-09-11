@@ -286,7 +286,7 @@ def pledge():
             return redirect(url_for('home') + '#promesse')
         db.session.add(Pledge(activity=activity, name=name, contact=contact, amount=amount, message=message, public_message=public_message))
         db.session.commit()
-        flash('Merci ! Ta promesse a bien été enregistrée. ❤️', 'success')
+        flash('Merci pour elle ! Votre don a bien été enregistré, on se recontacte quand nous procéderons aux réservations pour que Camille puisse récupérer sa part.', 'success')
     except Exception:
         db.session.rollback()
         flash('Impossible d’enregistrer la promesse. Vérifie les informations.', 'error')
