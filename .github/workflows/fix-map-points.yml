@@ -1,0 +1,48 @@
+name: Corrige carte voyage
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  fix-map:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Corriger les coordonnées et tracés
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('templates/index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Lofoten : positions réelles des étapes demandées.
+          s = s.replace('Sakrisoy:[67.8970,13.0095]', 'Sakrisoy:[67.94103,13.10997]')
+          s = s.replace('Hamoy:[67.9453,13.2837]', 'Hamoy:[67.94556,13.13167]')
+
+          # Croisière : tracé schématique reprenant le trajet dessiné,
+          # vers la zone arctique de recherche des baleines au nord-est de Tromsø.
+          s = s.replace('Quest:[69.72,18.55]', 'Quest:[69.78,20.05]')
+          s = s.replace("marker('cruise','Quest','🐋','MV Quest','9–10 jan. · 24 h en mer');", "marker('cruise','Quest','🐋','MV Quest','9–10 jan. · zone arctique baleines / aurores');")
+          s = s.replace("var cruiseLine=L.polyline([points.Tromso,points.Quest],{color:'#a96bd4',weight:3,dashArray:'5 6'}).addTo(groups.cruise);", "var cruiseLine=L.polyline([points.Tromso,[69.66,19.25],[69.72,19.55],[69.75,19.85],points.Quest],{color:'#6d19d9',weight:4,lineCap:'round',lineJoin:'round'}).addTo(groups.cruise);")
+
+          # Le bus suit désormais clairement l'axe Å → Reine → Sakrisøy → Hamnøy → Moskenes.
+          s = s.replace("var busLine=L.polyline([points.A,points.Moskenes,points.Reine,points.Hamoy],{color:'#e5b52d',weight:3,dashArray:'5 6'}).addTo(groups.bus);", "var busLine=L.polyline([points.A,points.Reine,points.Sakrisoy,points.Hamoy,points.Moskenes],{color:'#e5b52d',weight:3,dashArray:'5 6'}).addTo(groups.bus);")
+
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Vérifier
+        run: |
+          grep -q 'Sakrisoy:\[67.94103,13.10997\]' templates/index.html
+          grep -q 'Hamoy:\[67.94556,13.13167\]' templates/index.html
+          grep -q "points.Tromso,\[69.66,19.25\],\[69.72,19.55\],\[69.75,19.85\],points.Quest" templates/index.html
+      - name: Commit et suppression du workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add templates/index.html
+          git commit -m 'Corrige trajet croisière et points Lofoten'
+          git rm .github/workflows/fix-map-points.yml
+          git commit -m 'Supprime le workflow temporaire de correction'
+          git push
