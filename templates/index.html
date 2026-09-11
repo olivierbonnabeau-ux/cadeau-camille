@@ -105,4 +105,74 @@
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initTravelMap); else initTravelMap();
 })();
 </script>
+<!-- ACTIVITY-CAROUSELS-FIX -->
+<script>
+(function(){
+  var galleries = {
+    'Tromsø': [
+      ['/static/images/tromso.png','Tromsø'],
+      ['/static/images/tromso_01.jpeg','Tromsø — photo 2'],
+      ['/static/images/tromso_02.jpeg','Tromsø — photo 3']
+    ],
+    'Les îles Lofoten': [
+      ['/static/images/lofoten.png','Les Lofoten'],
+      ['/static/images/lofoten_01.jpeg','Lofoten — photo 2'],
+      ['/static/images/lofoten_02.jpeg','Lofoten — photo 3']
+    ],
+    "S'endormir sous les aurores boréales dans des cabanes au bout du monde": [
+      ['/static/images/cabin.png','Cabane à Å'],
+      ['/static/images/cabane_aa_01.jpeg','Cabane à Å — photo 2'],
+      ['/static/images/cabane_aa_02.jpeg','Cabane à Å — photo 3'],
+      ['/static/images/cabane_aa_03.jpeg','Cabane à Å — photo 4']
+    ]
+  };
+  function titleFromCard(card){
+    var h=card.querySelector('h3');
+    if(!h) return '';
+    return (h.textContent||'').trim().replace(/^[^A-Za-zÀ-ÿ0-9]+\s*/,'');
+  }
+  function buildGallery(card, items, key){
+    var old=card.querySelector('.media');
+    if(!old || card.querySelector('[data-gallery="'+key+'"]')) return;
+    var g=document.createElement('div');
+    g.className='gallery';
+    g.setAttribute('data-gallery',key);
+    g.dataset.index='0';
+    items.forEach(function(item,i){
+      var img=document.createElement('img');
+      img.src=item[0]; img.alt=item[1];
+      if(i===0) img.className='active';
+      g.appendChild(img);
+    });
+    var prev=document.createElement('button');
+    prev.type='button'; prev.className='arrow prev'; prev.textContent='‹';
+    prev.setAttribute('aria-label','Photo précédente');
+    prev.onclick=function(){moveGallery(key,-1)};
+    g.appendChild(prev);
+    var next=document.createElement('button');
+    next.type='button'; next.className='arrow next'; next.textContent='›';
+    next.setAttribute('aria-label','Photo suivante');
+    next.onclick=function(){moveGallery(key,1)};
+    g.appendChild(next);
+    var dots=document.createElement('div'); dots.className='dots';
+    items.forEach(function(_,i){
+      var dot=document.createElement('span');
+      dot.className='dotg'+(i===0?' active':'');
+      dot.setAttribute('role','button');
+      dot.setAttribute('aria-label','Afficher la photo '+(i+1));
+      dot.onclick=function(){setGallery(key,i)};
+      dots.appendChild(dot);
+    });
+    g.appendChild(dots);
+    old.replaceWith(g);
+  }
+  function init(){
+    document.querySelectorAll('#activites .activity-card').forEach(function(card){
+      var title=titleFromCard(card);
+      if(galleries[title]) buildGallery(card,galleries[title],'activity-'+title.replace(/[^a-z0-9]+/gi,'-').toLowerCase());
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
 </body></html>
