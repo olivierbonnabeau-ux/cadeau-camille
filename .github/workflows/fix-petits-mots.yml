@@ -1,4 +1,4 @@
-name: Ajuste les petits mots
+name: Corrige les petits mots
 on:
   push:
     branches: [main]
@@ -9,23 +9,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Modifier la section
+      - name: Corriger les petits mots
         run: |
           python - <<'PY'
           from pathlib import Path
           p=Path('templates/index.html')
           s=p.read_text(encoding='utf-8')
-          old='<section><h2 class="sectiontitle">💌 Les petits mots pour Camille</h2><p class="intro">Les personnes qui participent au cadeau apparaissent ici, même lorsqu’elles n’ont pas laissé de message. ❤️</p>{% if messages %}<div class="messages">{% for p in messages %}<article class="message"><div class="quote">{% if p.message %}{{p.message}}{% else %}Merci pour ta participation à cette belle aventure ! ❤️{% endif %}</div><div class="from">❤️ {{p.name}}</div>{% if p.activity %}<div class="tag">Sponsor de : {{p.activity.emoji}} {{p.activity.title}}</div>{% endif %}</article>{% endfor %}</div>{% else %}<div class="empty">Le premier participant au cadeau sera bientôt là… ❤️</div>{% endif %}</section>'
-          new='<section><h2 class="sectiontitle">💌 Les petits mots pour Camille</h2>{% if messages %}<div class="messages">{% for p in messages %}<article class="message">{% if p.message %}<div class="quote">{{p.message}}</div>{% endif %}<div class="from">❤️ {{p.name}}</div>{% if p.activity %}<div class="tag">🎁 Sponsor de : {{p.activity.emoji}} {{p.activity.title}}</div>{% endif %}</article>{% endfor %}</div>{% else %}<div class="empty">Le premier petit mot pour Camille sera bientôt là… ❤️</div>{% endif %}</section>'
-          assert old in s, 'Section cible introuvable'
-          p.write_text(s.replace(old,new,1),encoding='utf-8')
+          intro='<p class="intro">Les personnes qui participent au cadeau apparaissent ici, même lorsqu’elles n’ont pas laissé de message. ❤️</p>'
+          assert intro in s, 'Phrase à supprimer introuvable'
+          s=s.replace(intro,'',1)
+          old='{% else %}<div class="from">❤️ {{p.name}}</div>{% endif %}'
+          new='{% else %}<div class="from">❤️ {{p.name}}</div>{% if p.activity %}<div class="tag">Sponsor de : {{p.activity.emoji}} {{p.activity.title}}</div>{% endif %}{% endif %}'
+          assert old in s, 'Bloc des fiches sans message introuvable'
+          s=s.replace(old,new,1)
+          p.write_text(s,encoding='utf-8')
           PY
       - name: Commit et suppression du workflow
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add templates/index.html .github/workflows/fix-petits-mots.yml
-          git commit -m 'Affiche les petits mots et le programme sponsorisé'
+          git commit -m 'Corrige les petits mots des donateurs'
           git rm .github/workflows/fix-petits-mots.yml
           git commit -m 'Supprime le workflow temporaire'
           git push
