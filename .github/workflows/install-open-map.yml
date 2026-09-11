@@ -1,0 +1,158 @@
+name: Installe la carte open source
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  install-map:
+    if: github.event.head_commit.message != 'Ajoute la carte open source'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Installe Leaflet et intègre la carte
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p static/vendor
+          curl -fsSL https://unpkg.com/leaflet@1.9.4/dist/leaflet.js -o static/vendor/leaflet.js
+          curl -fsSL https://unpkg.com/leaflet@1.9.4/dist/leaflet.css -o static/vendor/leaflet.css
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('templates/index.html')
+          s = p.read_text(encoding='utf-8')
+          if 'static/vendor/leaflet.css' in s or 'id="travel-map"' in s:
+              raise SystemExit('La carte est déjà installée')
+
+          leaflet_css = '<link rel="stylesheet" href="/static/vendor/leaflet.css">'
+          s = s.replace('</head>', leaflet_css + '</head>', 1)
+
+          css = '''
+          .travel-map-section{margin-top:8px;background:#0d222e;border:1px solid var(--line);border-radius:28px;padding:16px;box-shadow:0 16px 40px #0003}
+          .travel-map-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:14px}
+          .travel-map-head p{margin:5px 0 0;color:var(--muted);font-size:14px}
+          .travel-map-kicker{font-weight:900;font-size:20px}
+          .travel-filters{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+          .travel-filter{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#102c3a;color:var(--text);font-weight:800;cursor:pointer}
+          .travel-filter.active{background:#173f51;border-color:var(--accent)}
+          .travel-map-grid{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(250px,.7fr);gap:12px}
+          #travel-map{height:560px;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#dbe9ee}
+          .travel-itinerary{background:#081923;border:1px solid var(--line);border-radius:18px;padding:15px;max-height:560px;overflow:auto}
+          .travel-itinerary h3{margin:0 0 10px;font-size:17px}
+          .travel-step{padding:9px 0;border-bottom:1px solid #294452;font-size:13px;line-height:1.35}
+          .travel-step:last-child{border-bottom:0}
+          .travel-step small{display:block;color:var(--muted);margin-top:3px}
+          .travel-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:10px}
+          .travel-summary>div{background:#0a1d29;border:1px solid var(--line);border-radius:14px;padding:11px}
+          .travel-summary strong{display:block;font-size:13px}.travel-summary span{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+          .travel-pin{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:2px solid white;box-shadow:0 3px 12px #0007;font-size:17px}
+          .travel-pin.flight{background:#239bd2}.travel-pin.boat{background:#d74352}.travel-pin.hotel{background:#43b56b}.travel-pin.bus{background:#e5b52d}.travel-pin.cruise{background:#a96bd4}
+          .travel-popup{min-width:190px}.travel-popup b{font-size:14px}.travel-popup small{color:#5f7782}
+          @media(max-width:850px){.travel-map-head{align-items:flex-start;flex-direction:column}.travel-filters{justify-content:flex-start}.travel-map-grid{grid-template-columns:1fr}#travel-map{height:460px}.travel-itinerary{max-height:none}.travel-summary{grid-template-columns:repeat(2,1fr)}}
+          @media(max-width:520px){#travel-map{height:390px}.travel-summary{grid-template-columns:1fr}.travel-map-section{padding:10px;border-radius:20px}}
+          '''
+          s = s.replace('</style>', css + '</style>', 1)
+
+          map_section = '''
+          <section class="travel-map-section" aria-label="Carte interactive du voyage">
+            <div class="travel-map-head">
+              <div><div class="travel-map-kicker">🗺️ Carte interactive du voyage</div><p>Vols, bateau, croisière, bus et hébergements — cliquez sur les points pour les détails.</p></div>
+              <div class="travel-filters">
+                <button class="travel-filter active" data-map-filter="flight">✈️ Vols</button>
+                <button class="travel-filter active" data-map-filter="boat">⛴️ Bateaux</button>
+                <button class="travel-filter active" data-map-filter="cruise">🐋 Croisière</button>
+                <button class="travel-filter active" data-map-filter="hotel">🏨 Hôtels</button>
+                <button class="travel-filter active" data-map-filter="bus">🚌 Bus</button>
+              </div>
+            </div>
+            <div class="travel-map-grid">
+              <div id="travel-map"></div>
+              <aside class="travel-itinerary">
+                <h3>📍 Les étapes</h3>
+                <div class="travel-step">✈️ <b>7 jan.</b> Paris → Tromsø<small>CDG 09:10 → TOS 13:05</small></div>
+                <div class="travel-step">🌌 <b>7–11 jan.</b> Tromsø<small>SmartHotel + City Living</small></div>
+                <div class="travel-step">🐋 <b>9–10 jan.</b> MV Quest<small>24 h en mer · baleines + aurores</small></div>
+                <div class="travel-step">✈️ <b>11 jan.</b> Tromsø → Bodø<small>11:40 → 12:40</small></div>
+                <div class="travel-step">⛴️ <b>11 jan.</b> Bodø → Moskenes<small>16:00 → 20:00 · piéton</small></div>
+                <div class="travel-step">🏔️ <b>11–14 jan.</b> Lofoten<small>Sakrisøy · Reine · Hamnøy · Å</small></div>
+                <div class="travel-step">⛴️ <b>14 jan.</b> Moskenes → Bodø<small>08:00 → 11:15</small></div>
+                <div class="travel-step">✈️ <b>14 jan.</b> Bodø → Oslo<small>17:50 → 19:20</small></div>
+                <div class="travel-step">🏙️ <b>14–17 jan.</b> Oslo<small>Appartement près de la gare centrale</small></div>
+                <div class="travel-step">✈️ <b>17 jan.</b> Oslo → Paris<small>09:00 → 11:25</small></div>
+              </aside>
+            </div>
+            <div class="travel-summary">
+              <div><strong>✈️ 4 vols</strong><span>Paris · Tromsø · Bodø · Oslo</span></div>
+              <div><strong>⛴️ 2 traversées</strong><span>Bodø ↔ Moskenes</span></div>
+              <div><strong>🐋 1 croisière</strong><span>MV Quest · 24 h</span></div>
+              <div><strong>🏨 5 hébergements</strong><span>Tromsø · Lofoten · Å · Oslo</span></div>
+            </div>
+            <p class="note" style="margin:10px 4px 0">Carte : Leaflet (BSD-2-Clause) · Données cartographiques © OpenStreetMap contributors.</p>
+          </section>
+          '''
+          pattern = r'<section><h2 class="sectiontitle">🗺️ Le voyage en un coup d’œil</h2>.*?</section>\n<section id="activites">'
+          replacement = '''<section><h2 class="sectiontitle">🗺️ Le voyage en un coup d’œil</h2><p class="intro">Paris → Tromsø → croisière arctique → Bodø → Lofoten → Oslo → Paris</p>''' + map_section + '''</section>\n<section id="activites">'''
+          s, n = re.subn(pattern, replacement, s, count=1, flags=re.S)
+          if n != 1:
+              raise SystemExit(f'Section carte introuvable: {n}')
+
+          script = '''
+          <script src="/static/vendor/leaflet.js"></script>
+          <script>
+          (function(){
+            function initTravelMap(){
+              if(!window.L || !document.getElementById('travel-map')) return;
+              var map=L.map('travel-map',{scrollWheelZoom:false,zoomControl:true}).setView([64.8,17.2],4);
+              L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
+              var groups={flight:L.layerGroup().addTo(map),boat:L.layerGroup().addTo(map),cruise:L.layerGroup().addTo(map),hotel:L.layerGroup().addTo(map),bus:L.layerGroup().addTo(map)};
+              var points={
+                Paris:[48.8566,2.3522],Tromso:[69.6492,18.9553],Bodo:[67.2804,14.4049],Moskenes:[67.8989,13.0460],Sakrisoy:[67.8970,13.0095],Reine:[67.9325,13.0896],Hamoy:[67.9453,13.2837],A:[67.8797,12.9822],Oslo:[59.9139,10.7522],Quest:[69.72,18.55]
+              };
+              function pin(type,emoji){return L.divIcon({className:'',html:'<div class="travel-pin '+type+'">'+emoji+'</div>',iconSize:[34,34],iconAnchor:[17,17]});}
+              function marker(type,key,emoji,title,html){return L.marker(points[key],{icon:pin(type,emoji)}).bindPopup('<div class="travel-popup"><b>'+title+'</b><br>'+html+'</div>').addTo(groups[type]);}
+              marker('flight','Paris','✈️','Paris','7 jan. · départ CDG');
+              marker('flight','Tromso','✈️','Tromsø','7 jan. · arrivée 13:05');
+              marker('flight','Bodo','✈️','Bodø','11 jan. · arrivée 12:40');
+              marker('flight','Oslo','✈️','Oslo','14 jan. · arrivée 19:20');
+              marker('flight','Paris','✈️','Paris','17 jan. · retour CDG');
+              marker('hotel','Tromso','🏨','SmartHotel Tromsø','7–9 jan.');
+              marker('hotel','Tromso','🏨','City Living Tromsø','10–11 jan.');
+              marker('hotel','Sakrisoy','🏨','Sakrisøy Gjestegård','11–13 jan.');
+              marker('hotel','A','🏨','Cabin 1 · Å','13–14 jan.');
+              marker('hotel','Oslo','🏨','Appartement Oslo','14–17 jan.');
+              marker('cruise','Quest','🐋','MV Quest','9–10 jan. · 24 h en mer');
+              marker('bus','Moskenes','🚌','Moskenes','Bus vers Reine / Hamnøy / Å');
+              marker('bus','Reine','🚌','Reine','Étape Lofoten');
+              marker('bus','Hamoy','🚌','Hamnøy','Étape Lofoten');
+              marker('bus','A','🚌','Å','Départ vers Moskenes');
+              var flightLine=L.polyline([points.Paris,points.Tromso,points.Bodo,points.Oslo,points.Paris],{color:'#239bd2',weight:3,dashArray:'8 7'}).addTo(groups.flight);
+              var boat1=L.polyline([points.Bodo,points.Moskenes],{color:'#d74352',weight:4}).addTo(groups.boat);
+              var boat2=L.polyline([points.Moskenes,points.Bodo],{color:'#d74352',weight:4,dashArray:'8 7'}).addTo(groups.boat);
+              var cruiseLine=L.polyline([points.Tromso,points.Quest],{color:'#a96bd4',weight:3,dashArray:'5 6'}).addTo(groups.cruise);
+              var busLine=L.polyline([points.A,points.Moskenes,points.Reine,points.Hamoy],{color:'#e5b52d',weight:3,dashArray:'5 6'}).addTo(groups.bus);
+              map.fitBounds(L.latLngBounds(Object.values(points)),{padding:[25,25]});
+              document.querySelectorAll('[data-map-filter]').forEach(function(btn){btn.addEventListener('click',function(){var t=btn.getAttribute('data-map-filter');var on=btn.classList.toggle('active');if(on) groups[t].addTo(map);else map.removeLayer(groups[t]);});});
+              setTimeout(function(){map.invalidateSize();},200);
+            }
+            if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initTravelMap); else initTravelMap();
+          })();
+          </script>
+          '''
+          s = s.replace('</body>', script + '</body>', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit et retire le workflow
+        run: |
+          rm -f .github/workflows/install-open-map.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add templates/index.html static/vendor/leaflet.js static/vendor/leaflet.css .github/workflows/install-open-map.yml
+          git commit -m 'Ajoute la carte open source'
+          git push
