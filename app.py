@@ -263,7 +263,7 @@ def images_for(activity):
 def home():
     activities = Activity.query.filter_by(active=True).order_by(Activity.sort_order).all()
     total = total_pledges()
-    goal = 1531.5
+    goal = 1532
     messages = Pledge.query.order_by(Pledge.created_at.desc()).all()
     return render_template('index.html', activities=activities, total=total, goal=goal, image_for=lambda a: images_for(a)[0], images_for=images_for, promises=PROMISES, messages=messages)
 
