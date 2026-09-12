@@ -264,7 +264,7 @@ def home():
     activities = Activity.query.filter_by(active=True).order_by(Activity.sort_order).all()
     total = total_pledges()
     goal = 1531.5
-    messages = Pledge.query.filter(Pledge.public_message.is_(True), Pledge.message.isnot(None), Pledge.message != '').order_by(Pledge.created_at.desc()).all()
+    messages = Pledge.query.order_by(Pledge.created_at.desc()).all()
     return render_template('index.html', activities=activities, total=total, goal=goal, image_for=lambda a: images_for(a)[0], images_for=images_for, promises=PROMISES, messages=messages)
 
 @app.route('/pledge', methods=['POST'])
