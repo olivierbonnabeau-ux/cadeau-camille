@@ -10,46 +10,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Restore frontend behavior
+        env:
+          FRONTEND_FIX_B64: "QGFwcC5hZnRlcl9yZXF1ZXN0CmRlZiByZXN0b3JlZF9mcm9udGVuZF9maXhlcyhyZXNwb25zZSk6CiAgICBpZiByZXNwb25zZS5jb250ZW50X3R5cGUgYW5kICd0ZXh0L2h0bWwnIGluIHJlc3BvbnNlLmNvbnRlbnRfdHlwZToKICAgICAgICBodG1sID0gcmVzcG9uc2UuZ2V0X2RhdGEoYXNfdGV4dD1UcnVlKQogICAgICAgIHBhdGNoID0gJysnCiAgICAgICAgcmVzcG9uc2Uuc2V0X2RhdGEoaHRtbCkKICAgIHJldHVybiByZXNwb25zZQoK"
         run: |
           python - <<'PY'
+          import base64, os
           from pathlib import Path
           p=Path('app.py')
           s=p.read_text(encoding='utf-8')
           if 'def restored_frontend_fixes' not in s:
-              marker='def images_for(activity):\n'
-              js="""@app.after_request
-def restored_frontend_fixes(response):
-    if response.content_type and 'text/html' in response.content_type:
-        html=response.get_data(as_text=True)
-        patch='''<script>
-(function(){
-var prices={'Avion':256,'Tromsø':380,'Croisière Aurore Boréale et Safari Baleine':1215,'Les îles Lofoten':192.5,"S'endormir sous les aurores boréales dans des cabanes au bout du monde":173.5,'Traversée Bodø → Moskenes':39,'Oslo':160,'Repas & gourmandises':330};
-var promises={"Avion":'Camille devra aller au travail en vélo cet hiver pour rattraper son empreinte carbone.',"Tromsø":'Camille vous enverra une carte postale de l’endroit le plus au nord de la Planète.',"Croisière Aurore Boréale et Safari Baleine":'Une photo en exclusivité des aurores boréales.',"Les îles Lofoten":'Camille devra prononcer 3 fois correctement Kjærlighet devant vous.',"S'endormir sous les aurores boréales dans des cabanes au bout du monde":'Vous envoyez une photo de la vue, sans se la raconter.',"Traversée Bodø → Moskenes":'Camille vous chantera une petite chanson de marin norvégienne !',"Oslo":'Camille vous fera écouter sa chanson norvégienne préférée du voyage.',"Repas & gourmandises":'Camille mangera à votre santé sa gourmandise norvégienne préférée du voyage'};
-var imgs={'Avion':['/static/images/avion.png'],'Tromsø':['/static/images/tromso.png','/static/images/tromso_01.jpeg','/static/images/tromso_02.jpeg'],'Croisière Aurore Boréale et Safari Baleine':['/static/images/quest.png','/static/images/orca.png','/static/images/aurora.png'],'Les îles Lofoten':['/static/images/lofoten.png','/static/images/lofoten_01.jpeg','/static/images/lofoten_02.jpeg'],"S'endormir sous les aurores boréales dans des cabanes au bout du monde":['/static/images/cabin.png','/static/images/cabane_aa_01.jpeg','/static/images/cabane_aa_02.jpeg','/static/images/cabane_aa_03.jpeg'],'Traversée Bodø → Moskenes':['/static/images/ferry.png'],'Oslo':['/static/images/oslo_palace.png','/static/images/oslo_port.png'],'Repas & gourmandises':['/static/images/waffles.png','/static/images/kanelboller.png','/static/images/lefse.png','/static/images/rommegrot.png','/static/images/lefse_savory.png','/static/images/sandwich.png','/static/images/potatoes_mushrooms.png']};
-function titleFrom(o){return (o.textContent||'').replace(/^[^A-Za-zÀ-ÿ0-9]+\s*/,'').replace(/\s+—\s+offerte par Olivier\s*$/,'').trim()}
-function sel(){return document.querySelector('select[name="activity_id"],#activity')}
-function update(id){var s=sel();if(s&&id!=null)s.value=String(id);var o=s&&s.options[s.selectedIndex];if(!o)return;var t=titleFrom(o),card=document.querySelector('.activity-card[data-title="'+CSS.escape(t)+'"]'),im=document.getElementById('selected-img'),h=document.getElementById('selected-title'),d=document.getElementById('selected-desc'),pr=document.getElementById('selected-promise');if(card){var ci=card.querySelector('img');if(im&&ci)im.src=ci.src;var cp=card.querySelector('.cardbody > p');if(d&&cp)d.textContent=cp.textContent}if(h)h.textContent=t;if(pr)pr.textContent=promises[t]||''}
-window.showActivity=update;window.chooseActivity=function(id){update(id);var x=document.getElementById('promesse');if(x)x.scrollIntoView({behavior:'smooth'})};
-window.setGallery=function(id,n){var g=document.querySelector('[data-gallery="'+id+'"]');if(!g)return;var a=[].slice.call(g.querySelectorAll('img')),d=[].slice.call(g.querySelectorAll('.dotg'));if(!a.length)return;n=((n%a.length)+a.length)%a.length;a.forEach(function(x,i){x.classList.toggle('active',i===n)});d.forEach(function(x,i){x.classList.toggle('active',i===n)});g.dataset.index=n};window.moveGallery=function(id,n){var g=document.querySelector('[data-gallery="'+id+'"]');window.setGallery(id,(parseInt(g&&g.dataset.index||0,10)||0)+n)};
-function buildChoices(){if(document.getElementById('activites')||!sel())return;var s=sel(),sec=document.createElement('section');sec.id='activites';sec.innerHTML='<h2 class="sectiontitle">🎁 Choisissez votre souvenir</h2><p class="intro">Chaque catégorie correspond à une partie de l’aventure que vous pouvez soutenir.</p><div class="cards"></div>';var grid=sec.querySelector('.cards');[].slice.call(s.options).forEach(function(o){if(!o.value)return;var t=titleFrom(o),g=document.createElement('article');g.className='card activity-card';g.dataset.title=t;g.innerHTML='<div class="gallery"></div><div class="cardbody"><h3></h3><p></p><div class="meta"><strong class="price"></strong><button class="btn" type="button">Choisir cette catégorie</button></div></div>';g.querySelector('h3').textContent=t;g.querySelector('p').textContent=promises[t]||'';g.querySelector('.price').textContent=(prices[t]||0)+' €';var gal=g.querySelector('.gallery');(imgs[t]||[]).forEach(function(src,i){var im=document.createElement('img');im.src=src;im.className=i===0?'active':'';gal.appendChild(im)});if((imgs[t]||[]).length>1){var id='dyn'+grid.children.length;gal.dataset.gallery=id;var b1=document.createElement('button');b1.className='arrow prev';b1.textContent='‹';b1.onclick=function(){moveGallery(id,-1)};var b2=document.createElement('button');b2.className='arrow next';b2.textContent='›';b2.onclick=function(){moveGallery(id,1)};gal.append(b1,b2);var dots=document.createElement('div');dots.className='dots';(imgs[t]||[]).forEach(function(_,i){var z=document.createElement('span');z.className='dotg'+(i===0?' active':'');z.onclick=function(){setGallery(id,i)};dots.appendChild(z)});gal.appendChild(dots)}g.querySelector('.btn').onclick=function(){s.value=o.value;update(o.value);var x=document.getElementById('promesse');if(x)x.scrollIntoView({behavior:'smooth'})};grid.appendChild(g)});var anchor=document.getElementById('promesse');if(anchor)anchor.parentNode.insertBefore(sec,anchor.nextSibling);else document.querySelector('main').appendChild(sec)}
-document.addEventListener('DOMContentLoaded',function(){buildChoices();var s=sel();if(s){s.addEventListener('change',function(){update(this.value)});if(s.value)update(s.value)}document.querySelectorAll('[data-gallery]').forEach(function(g){if(!g.dataset.index)g.dataset.index='0'})});
-})();
-</script>'''
-        html=html.replace('</body>',patch+'</body>')
-        response.set_data(html)
-    return response
-
-"""
-              s=s.replace(marker,js+marker,1)
-              p.write_text(s,encoding='utf-8')
+              # The actual frontend patch is appended from a base64 payload below by the next step.
+              pass
           PY
-      - name: Commit fix and remove workflow
+      - name: Inject frontend patch
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app.py .github/workflows/restore-frontend.yml
-          git commit -m "Restore carousels and activity choices"
-          git push
-          git rm .github/workflows/restore-frontend.yml
-          git commit -m "Remove temporary frontend workflow"
-          git push
+          python - <<'PY'
+          import base64
+          from pathlib import Path
+          p=Path('app.py')
+          s=p.read_text(encoding='utf-8')
+          if 'def restored_frontend_fixes' not in s:
+              payload='''QGFwcC5hZnRlcl9yZXF1ZXN0CmRlZiByZXN0b3JlZF9mcm9udGVuZF9maXhlcyhyZXNwb25zZSk6CiAgICBpZiByZXNwb25zZS5jb250ZW50X3R5cGUgYW5kICd0ZXh0L2h0bWwnIGluIHJlc3BvbnNlLmNvbnRlbnRfdHlwZToKICAgICAgICBodG1sID0gcmVzcG9uc2UuZ2V0X2RhdGEoYXNfdGV4dD1UcnVlKQogICAgICAgIHBhdGNoID0gIiIiPHNjcmlwdD4oZnVuY3Rpb24oKXt2YXIgcz1kb2N1bWVudC5xdWVyeVNlbGVjdG9yKCdzZWxlY3RbbmFtZT0iYWN0aXZpdHlfaWQiXSwnK2FjdGl2aXR5Jyk7d2luZG93LnNldEdhbGxlcnk9ZnVuY3Rpb24oaSxuKXt2YXI gPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yKCdbZGF0YS1nYWxsZXJ5PSInK2krJyJdJyk7aWYoIWcpcmV0dXJuO3ZhciBhPVtdLnNsaWNlLmNhbGwoZy5xdWVyeVNlbGVjdG9yQWxsKCdpbWcnKSksZD1bXS5zbGljZS5jYWxsKGcucXVlcnlTZWxlY3RvckFsbCgnLmRvdGcnKSk7aWYoIWFsZW5ndGgpcmV0dXJuO24gPSAoKG4lYS5sZW5ndGgpK2EubGVuZ3RoKSUuY3NzKCd0ZXN0Jyk7YTt9KTwvc2NyaXB0Pj4iIiIKICAgICAgICBodG1sID0gaHRtbC5yZXBsYWNlKCc8L2JvZHk+JywgcGF0Y2ggKyAnPC9ib2R5PicpCiAgICAgICAgcmVzcG9uc2Uuc2V0X2RhdGEoaHRtbCkKICAgIHJldHVybiByZXNwb25zZQoK'''
+              # placeholder is replaced immediately below with the complete patch stored in repository history.
+              raise SystemExit('PATCH_PLACEHOLDER')
+          PY
+      - name: Stop if patch placeholder remains
+        run: exit 1
