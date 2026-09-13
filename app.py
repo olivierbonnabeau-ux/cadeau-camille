@@ -130,8 +130,11 @@ def images_for(activity):
     return imgs or [FALLBACK_IMAGE]
 
 def total_pledges():
-    # Afficher le total de toutes les promesses de don enregistrées.
-    return db.session.query(func.coalesce(func.sum(Pledge.amount), 0)).scalar() or 0
+    # La croisière est offerte par Olivier : ses anciennes promesses éventuelles
+    # ne doivent jamais réduire le reste à charge de Camille.
+    return db.session.query(func.coalesce(func.sum(Pledge.amount), 0)).join(Activity, Pledge.activity_id == Activity.id, isouter=True).filter(
+        (Activity.title.is_(None)) | (Activity.title != 'Croisière Aurore Boréale et Safari Baleine')
+    ).scalar() or 0
 
 def admin_ok():
     return session.get('admin') is True
@@ -140,7 +143,8 @@ def admin_ok():
 def home():
     activities = Activity.query.filter_by(active=True).order_by(Activity.sort_order).all()
     total = total_pledges()
-    goal = 1531.5
+    goal = 1532
+    # Tous les participants apparaissent ici, avec ou sans petit mot.
     messages = Pledge.query.order_by(Pledge.created_at.desc()).all()
     return render_template('index.html', activities=activities, total=total, goal=goal, image_for=lambda a: images_for(a)[0], images_for=images_for, promises=PROMISES, messages=messages)
 
