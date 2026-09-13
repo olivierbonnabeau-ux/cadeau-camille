@@ -125,174 +125,24 @@ with app.app_context():
     ensure_schema()
     sync_activities()
 
-@app.after_request
-def final_frontend_fixes(response):
-    if response.content_type and 'text/html' in response.content_type:
-        html = response.get_data(as_text=True)
-        html = html.replace(' · La croisière est offerte séparément par Olivier et n’entre pas dans l’effort d’épargne.', '')
-        html = html.replace(" · La croisière est offerte séparément par Olivier et n'entre pas dans l'effort d'épargne.", '')
-        patch = r'''<script>
-(function(){
-  var activityPrices={
-    'Avion':256,
-    'Tromsø':380,
-    'Croisière Aurore Boréale et Safari Baleine':1215,
-    'Les îles Lofoten':192.50,
-    "S'endormir sous les aurores boréales dans des cabanes au bout du monde":173.50,
-    'Traversée Bodø → Moskenes':39,
-    'Oslo':160,
-    'Repas & gourmandises':330
-  };
-  var activityPromises={
-    'Avion':'Camille devra aller au travail en vélo cet hiver pour rattraper son empreinte carbone.',
-    'Tromsø':'Camille vous enverra une carte postale de l’endroit le plus au nord de la Planète.',
-    'Croisière Aurore Boréale et Safari Baleine':'Une photo en exclusivité des aurores boréales.',
-    'Les îles Lofoten':'Camille devra prononcer 3 fois correctement Kjærlighet devant vous.',
-    "S'endormir sous les aurores boréales dans des cabanes au bout du monde":'Vous envoyez une photo de la vue, sans se la raconter.',
-    'Traversée Bodø → Moskenes':'Camille vous chantera une petite chanson de marin norvégienne !',
-    'Oslo':'Camille vous fera écouter sa chanson norvégienne préférée du voyage.',
-    'Repas & gourmandises':'Camille mangera à votre santé sa gourmandise norvégienne préférée du voyage'
-  };
-  function getSelectedTitle(){
-    var select=document.querySelector('select[name="activity_id"],#activity');
-    if(!select || !select.options.length) return '';
-    var option=select.options[select.selectedIndex];
-    return (option.textContent||'').replace(/\s+—\s+offerte par Olivier\s*$/,'').trim().replace(/^[^A-Za-zÀ-ÿ0-9]+\s*/,'');
-  }
-  function getCardData(title){
-    var cards=document.querySelectorAll('#activites .activity-card');
-    for(var i=0;i<cards.length;i++){
-      var h=cards[i].querySelector('h3');
-      if(!h) continue;
-      var cardTitle=(h.textContent||'').trim().replace(/^[^A-Za-zÀ-ÿ0-9]+\s*/,'');
-      if(cardTitle===title || cardTitle.indexOf(title)>=0){
-        var img=cards[i].querySelector('.media img, .gallery img');
-        var p=cards[i].querySelector('.cardbody > p');
-        var price=cards[i].querySelector('.price');
-        return {title:cardTitle, img:img?img.src:'', desc:p?p.textContent.trim():'', price:price?price.textContent.trim():''};
-      }
-    }
-    return null;
-  }
-  function ensurePriceElement(){
-    var preview=document.querySelector('.selected-preview');
-    if(!preview) return null;
-    var content=preview.querySelector(':scope > div');
-    if(!content) return null;
-    var price=document.getElementById('selected-price');
-    if(!price){
-      price=document.createElement('div');
-      price.id='selected-price';
-      price.style.cssText='font-size:20px;font-weight:800;margin:0 0 10px;color:#f5d58a;';
-      var title=content.querySelector('#selected-title');
-      if(title) content.insertBefore(price,title);
-      else content.prepend(price);
-    }
-    return price;
-  }
-  function updateActivity(id){
-    var select=document.querySelector('select[name="activity_id"],#activity');
-    if(select && id!=null) select.value=String(id);
-    var title=getSelectedTitle();
-    var card=getCardData(title);
-    if(!card) return;
-    var img=document.getElementById('selected-img');
-    var h=document.getElementById('selected-title');
-    var p=document.getElementById('selected-desc');
-    var promise=document.getElementById('selected-promise');
-    if(img && card.img){img.src=card.img;img.alt=title;}
-    if(h) h.textContent=(card.title||title);
-    if(p) p.textContent=card.desc||'';
-    if(promise) promise.textContent=activityPromises[title]||'';
-    var price=ensurePriceElement();
-    if(price){
-      var amount=activityPrices[title];
-      price.textContent='💶 Montant du poste : '+(amount===undefined?'':(Number.isInteger(amount)?amount:amount.toFixed(2))+' €');
-    }
-  }
-  window.showActivity=updateActivity;
-  window.chooseActivity=function(id){
-    var select=document.querySelector('select[name="activity_id"],#activity');
-    if(select) select.value=String(id);
-    updateActivity(id);
-    var target=document.getElementById('promesse');
-    if(target) target.scrollIntoView({behavior:'smooth'});
-  };
-  window.setGallery=function(id,index){
-    var g=document.querySelector('[data-gallery="'+id+'"]');
-    if(!g) return;
-    var imgs=Array.prototype.slice.call(g.querySelectorAll('img'));
-    var dots=Array.prototype.slice.call(g.querySelectorAll('.dotg'));
-    if(!imgs.length) return;
-    index=((Number(index)||0)%imgs.length+imgs.length)%imgs.length;
-    imgs.forEach(function(img,n){img.classList.toggle('active',n===index);});
-    dots.forEach(function(dot,n){dot.classList.toggle('active',n===index);});
-    g.dataset.index=String(index);
-  };
-  window.moveGallery=function(id,delta){
-    var g=document.querySelector('[data-gallery="'+id+'"]');
-    if(!g) return;
-    var current=parseInt(g.dataset.index||'0',10)||0;
-    window.setGallery(id,current+(Number(delta)||0));
-  };
-  document.addEventListener('DOMContentLoaded',function(){
-    ensurePriceElement();
-    var select=document.querySelector('select[name="activity_id"],#activity');
-    if(select){
-      select.addEventListener('change',function(){updateActivity(this.value);});
-      updateActivity(select.value);
-    }
-    document.querySelectorAll('[data-gallery]').forEach(function(g){if(!g.dataset.index)g.dataset.index='0';});
-  });
-})();
-</script>'''
-        html = html.replace('</body>', patch + '</body>')
-        response.set_data(html)
-    return response
+def images_for(activity):
+    imgs = IMAGE_MAP.get(activity.title, [])
+    return imgs or [FALLBACK_IMAGE]
+
+def total_pledges():
+    # Afficher le total de toutes les promesses de don enregistrées.
+    return db.session.query(func.coalesce(func.sum(Pledge.amount), 0)).scalar() or 0
 
 def admin_ok():
     return session.get('admin') is True
-
-def total_pledges():
-    return db.session.query(func.coalesce(func.sum(Pledge.amount), 0)).join(Activity, Pledge.activity_id == Activity.id).filter(Activity.active.is_(True), Activity.title != 'Croisière Aurore Boréale et Safari Baleine').scalar() or 0
-
-def images_for(activity):
-    return IMAGE_MAP.get(activity.title, [FALLBACK_IMAGE])
 
 @app.route('/')
 def home():
     activities = Activity.query.filter_by(active=True).order_by(Activity.sort_order).all()
     total = total_pledges()
-    goal = 1532
+    goal = 1531.5
     messages = Pledge.query.order_by(Pledge.created_at.desc()).all()
     return render_template('index.html', activities=activities, total=total, goal=goal, image_for=lambda a: images_for(a)[0], images_for=images_for, promises=PROMISES, messages=messages)
-
-@app.route('/pledge', methods=['POST'])
-def pledge():
-    name = request.form.get('name','').strip()
-    contact = request.form.get('contact','').strip()
-    message = request.form.get('message','').strip()
-    amount_raw = request.form.get('amount','').strip().replace(',','.')
-    activity_id = request.form.get('activity_id')
-    if not name or not contact or not amount_raw or not activity_id:
-        flash('Merci de remplir tous les champs obligatoires.', 'error')
-        return redirect(url_for('home') + '#promesse')
-    try:
-        amount = float(amount_raw)
-    except ValueError:
-        flash('Le montant indiqué n’est pas valide.', 'error')
-        return redirect(url_for('home') + '#promesse')
-    activity = db.session.get(Activity, int(activity_id))
-    if not activity or not activity.active:
-        flash('Cette activité n’est plus disponible.', 'error')
-        return redirect(url_for('home') + '#promesse')
-    if activity.title == 'Croisière Aurore Boréale et Safari Baleine':
-        flash('La croisière est offerte séparément par Olivier et ne peut pas faire l’objet d’une promesse de don.', 'error')
-        return redirect(url_for('home') + '#promesse')
-    db.session.add(Pledge(activity_id=activity.id, name=name, contact=contact, amount=amount, message=message, public_message=True))
-    db.session.commit()
-    flash('Merci pour elle ! Votre don a bien été enregistré, on se recontacte quand nous procéderons aux réservations pour que Camille puisse récupérer sa part.', 'success')
-    return redirect(url_for('home') + '#promesse')
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
@@ -308,53 +158,43 @@ def admin_login():
 @app.route('/admin/logout')
 def admin_logout():
     session.pop('admin', None)
-    return redirect(url_for('admin_login'))
+    return redirect(url_for('admin'))
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     if not admin_ok():
         return redirect(url_for('admin_login'))
-
     if request.method == 'POST':
-        action = request.form.get('action', '')
-        pledge_id = request.form.get('id')
-
-        if action == 'delete' and pledge_id:
-            pledge = db.session.get(Pledge, int(pledge_id))
+        action = request.form.get('action')
+        pledge_id = request.form.get('pledge_id', type=int)
+        if action == 'delete_pledge' and pledge_id:
+            pledge = db.session.get(Pledge, pledge_id)
             if pledge:
                 db.session.delete(pledge)
                 db.session.commit()
                 flash('Promesse supprimée.', 'success')
-
-        elif action == 'status' and pledge_id:
-            pledge = db.session.get(Pledge, int(pledge_id))
+        elif action == 'toggle_status' and pledge_id:
+            pledge = db.session.get(Pledge, pledge_id)
             if pledge:
-                pledge.status = request.form.get('status', 'promesse')
+                pledge.status = 'confirmé' if pledge.status != 'confirmé' else 'promesse'
                 db.session.commit()
                 flash('Statut mis à jour.', 'success')
-
-        elif action == 'public_message' and pledge_id:
-            pledge = db.session.get(Pledge, int(pledge_id))
+        elif action == 'toggle_public' and pledge_id:
+            pledge = db.session.get(Pledge, pledge_id)
             if pledge:
-                pledge.public_message = request.form.get('public') == '1'
+                pledge.public_message = not pledge.public_message
                 db.session.commit()
                 flash('Visibilité du message mise à jour.', 'success')
-
-        elif action == 'activity' and request.form.get('id'):
-            activity = db.session.get(Activity, int(request.form['id']))
+        elif action == 'edit_activity':
+            activity_id = request.form.get('activity_id', type=int)
+            activity = db.session.get(Activity, activity_id)
             if activity:
-                activity.title = request.form.get('title', activity.title).strip()
-                activity.description = request.form.get('description', activity.description).strip()
-                try:
-                    activity.target = float(request.form.get('target', activity.target))
-                except ValueError:
-                    pass
-                activity.active = request.form.get('active') == 'on'
+                activity.title = request.form.get('title', activity.title)
+                activity.description = request.form.get('description', activity.description)
+                activity.target = request.form.get('target', type=float) or activity.target
                 db.session.commit()
                 flash('Activité mise à jour.', 'success')
-
         return redirect(url_for('admin'))
-
     pledges = Pledge.query.order_by(Pledge.created_at.desc()).all()
     public_messages = Pledge.query.filter(Pledge.public_message.is_(True), Pledge.message.isnot(None), Pledge.message != '').order_by(Pledge.created_at.desc()).all()
     activities = Activity.query.order_by(Activity.sort_order).all()
@@ -367,17 +207,35 @@ def admin_export():
         return redirect(url_for('admin_login'))
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['Date', 'Participant', 'Contact', 'Activité', 'Montant', 'Statut', 'Message', 'Public'])
+    writer.writerow(['Nom', 'Contact', 'Montant', 'Activité', 'Statut', 'Message', 'Public', 'Date'])
     for p in Pledge.query.order_by(Pledge.created_at.desc()).all():
-        writer.writerow([
-            p.created_at.strftime('%d/%m/%Y %H:%M') if p.created_at else '',
-            p.name, p.contact,
-            p.activity.title if p.activity else '',
-            f'{p.amount:.2f}', p.status or '', p.message or '',
-            'oui' if p.public_message else 'non'
-        ])
-    return Response(output.getvalue(), mimetype='text/csv; charset=utf-8', headers={'Content-Disposition': 'attachment; filename=promesses_camille.csv'})
+        writer.writerow([p.name, p.contact, p.amount, p.activity.title if p.activity else '', p.status, p.message or '', 'oui' if p.public_message else 'non', p.created_at.isoformat() if p.created_at else ''])
+    return Response(output.getvalue(), mimetype='text/csv', headers={'Content-Disposition': 'attachment; filename=promesses-cadeau-camille.csv'})
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+@app.route('/pledge', methods=['POST'])
+def pledge():
+    activity_id = request.form.get('activity_id', type=int)
+    activity = db.session.get(Activity, activity_id) if activity_id else None
+    if not activity or not activity.active:
+        flash('Choisissez une activité valide.', 'error')
+        return redirect(url_for('home'))
+    if activity.title == 'Croisière Aurore Boréale et Safari Baleine':
+        flash('Cette activité est déjà offerte par Olivier.', 'error')
+        return redirect(url_for('home'))
+    name = request.form.get('name', '').strip()
+    contact = request.form.get('contact', '').strip()
+    amount = request.form.get('amount', type=float)
+    message = request.form.get('message', '').strip()
+    if not name or not contact or not amount or amount <= 0:
+        flash('Merci de renseigner votre nom, votre contact et un montant valide.', 'error')
+        return redirect(url_for('home'))
+    p = Pledge(activity_id=activity.id, name=name, contact=contact, amount=amount, message=message, public_message=True, status='promesse')
+    db.session.add(p)
+    db.session.commit()
+    flash('Merci pour elle ! Votre don a bien été enregistré, on se recontacte quand nous procéderons aux réservations pour que Camille puisse récupérer sa part.', 'success')
+    return redirect(url_for('home'))
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    db.session.rollback()
+    return 'Internal Server Error', 500
