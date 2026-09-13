@@ -1,0 +1,82 @@
+name: Fix selected category preview
+on:
+  workflow_dispatch:
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch app.py
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('app.py')
+          s = p.read_text()
+          if 'def restore_selected_category(' not in s:
+              marker = "@app.route('/')\n"
+              patch = r'''@app.after_request
+          def restore_selected_category(response):
+              if response.content_type and 'text/html' in response.content_type:
+                  html = response.get_data(as_text=True)
+                  marker = '</body>'
+                  if marker in html and 'id="selected-category-fix"' not in html:
+                      import json
+                      data = json.dumps({
+                          title: {
+                              'images': IMAGE_MAP.get(title, [FALLBACK_IMAGE]),
+                              'promise': PROMISES.get(title, '')
+                          } for _, title, _, _ in ACTIVITIES
+                      }, ensure_ascii=False).replace('</', '<\\/')
+                      script = '''<script id="selected-category-fix">
+          (function(){
+            const DATA=__DATA__;
+            function clean(s){return String(s||'').replace(/^\\s*[A-Za-zÀ-ÿ0-9]*\\s*[·:-]?\\s*/,'').trim();}
+            function esc(s){return String(s||'').replace(/[&<>\\\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+            function updatePreview(){
+              const sel=document.querySelector('select[name="activity_id"]');
+              const box=document.querySelector('.selected-preview');
+              if(!sel||!box) return;
+              const opt=sel.options[sel.selectedIndex];
+              if(!opt||!opt.value) return;
+              let title=clean(opt.textContent);
+              let key=Object.keys(DATA).find(k=>clean(k)===title) || Object.keys(DATA).find(k=>title.includes(clean(k))||clean(k).includes(title));
+              if(!key) return;
+              const d=DATA[key], img=(d.images&&d.images[0])||'';
+              const promise=d.promise||'';
+              const desc=opt.dataset.description||'';
+              box.innerHTML='<img src="'+esc(img)+'" alt="'+esc(key)+'"><div><h3>'+esc(key)+'</h3>'+(desc?'<p>'+esc(desc)+'</p>':'')+(promise?'<div class="promise"><b>🎁 Votre promesse :</b><br>'+esc(promise)+'</div>':'')+'</div>';
+            }
+            document.addEventListener('DOMContentLoaded',function(){
+              const sel=document.querySelector('select[name="activity_id"]');
+              if(!sel) return;
+              sel.addEventListener('change',updatePreview);
+              updatePreview();
+            });
+          })();
+          </script>'''.replace('__DATA__', data)
+                      html = html.replace(marker, script + marker)
+                      response.set_data(html)
+              return response
+
+          '''
+              if marker not in s:
+                  raise SystemExit('route marker not found')
+              s = s.replace(marker, patch + marker, 1)
+              p.write_text(s)
+          PY
+      - name: Validate Python
+        run: python -m py_compile app.py
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.py
+          git diff --cached --quiet || git commit -m "Fix selected donation category preview"
+          git push
+      - name: Remove workflow
+        if: always()
+        run: |
+          rm -f .github/workflows/fix-selected-category.yml
+          git add .github/workflows/fix-selected-category.yml
+          git diff --cached --quiet || git commit -m "Remove temporary fix workflow"
+          git push
