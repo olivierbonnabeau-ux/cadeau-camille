@@ -1,9 +1,49 @@
-import os, base64
+import os
 from jinja2 import FileSystemLoader
 from app import app
 
 app.template_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app.jinja_loader = FileSystemLoader(app.template_folder)
 
-_FRONTEND_FIX = "QGFwcC5hZnRlcl9yZXF1ZXN0CmRlZiBmcm9udGVuZF9jYXJvdXNlbHMocmVzcG9uc2UpOgogICAgaWYgcmVzcG9uc2UuY29udGVudF90eXBlIGFuZCAndGV4dC9odG1sJyBpbiByZXNwb25zZS5jb250ZW50X3R5cGU6CiAgICAgICAgaHRtbCA9IHJlc3BvbnNlLmdldF9kYXRhKGFzX3RleHQ9VHJ1ZSkKICAgICAgICBwYXRjaCA9ICcnJzxzY3JpcHQ+CihmdW5jdGlvbigpewp2YXIgST17J1Ryb21zw7gnOlsnL3N0YXRpYy9pbWFnZXMvdHJvbXNvLnBuZycsJy9zdGF0aWMvaW1hZ2VzL3Ryb21zb18wMS5qcGVnJywnL3N0YXRpYy9pbWFnZXMvdHJvbXNvXzAyLmpwZWcnXSwnTGVzIMOubGVzIExvZm90ZW4nOlsnL3N0YXRpYy9pbWFnZXMvbG9mb3Rlbi5wbmcnLCcvc3RhdGljL2ltYWdlcy9sb2ZvdGVuXzAxLmpwZWcnLCcvc3RhdGljL2ltYWdlcy9sb2ZvdGVuXzAyLmpwZWcnXSwiUydlbmRvcm1pciBzb3VzIGxlcyBhdXJvcmVzIGJvcsOpYWxlcyBkYW5zIGRlcyBjYWJhbmVzIGF1IGJvdXQgZHUgbW9uZGUiOlsnL3N0YXRpYy9pbWFnZXMvY2FiaW4ucG5nJywnL3N0YXRpYy9pbWFnZXMvY2FiYW5lX2FhXzAxLmpwZWcnLCcvc3RhdGljL2ltYWdlcy9jYWJhbmVfYWFfMDIuanBlZycsJy9zdGF0aWMvaW1hZ2VzL2NhYmFuZV9hYV8wMy5qcGVnJ119Owp3aW5kb3cuc2V0R2FsbGVyeT1mdW5jdGlvbihpZCxuKXt2YXIgZz1kb2N1bWVudC5xdWVyeVNlbGVjdG9yKCdbZGF0YS1nYWxsZXJ5PSInK2lkKyciXScpO2lmKCFnKXJldHVybjt2YXIgYT1bLi4uZy5xdWVyeVNlbGVjdG9yQWxsKCdpbWcnKV0sZD1bLi4uZy5xdWVyeVNlbGVjdG9yQWxsKCcuZG90ZycpXTtuPShuK2EubGVuZ3RoKSVhLmxlbmd0aDthLmZvckVhY2goKHgsaSk9PnguY2xhc3NMaXN0LnRvZ2dsZSgnYWN0aXZlJyxpPT09bil9O2QuZm9yRWFjaCgoeCxpKT0+eC5jbGFzc0xpc3QudG9nZ2xlKCdhY3RpdmUnLGk9PT1uKSk7Zy5kYXRhc2V0LmluZGV4PW59Owp3aW5kb3cubW92ZUdhbGxlcnk9ZnVuY3Rpb24oaWQsbil7dmFyIGc9ZG9jdW1lbnQucXVlcnlTZWxlY3RvcignW2RhdGEtZ2FsbGVyeT0iJytpZCsnIl0nKTtzZXRHYWxsZXJ5KGlkLCgrKGcmJmcuZGF0YXNldC5pbmRleHx8MCkpK24pfTsKZnVuY3Rpb24gYnVpbGQoKXt2YXIgcz1kb2N1bWVudC5xdWVyeVNlbGVjdG9yKCdzZWxlY3RbbmFtZT0iYWN0aXZpdHlfaWQiXScpO2lmKCFzfHxkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnYWN0aXZ0ZXMnKSl8fCFzKXJldHVybjt2YXIgX2hlbHBlcj1zO3ZhciBzZWM9ZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnc2VjdGlvbicpO3NlYy5pZD0nYWN0aXZpdGVzJztzZWMuaW5uZXJIVE1MPSc8aDIgY2xhc3M9InNlY3Rpb250aXRsZSI+8J+OgSBDaG9pc2lzc2V6IHZvdHJlIHNvdXZlbmlyPC9oMj48cCBjbGFzcz0iaW50cm8iPkNoYXF1ZSBjYXRlZ29yaWUgY29ycmVzcG9uZCBhdCB1bmUgcGFydGllIGRlIGwnaXZlbnR1cmUgcXVlIHZvdXMgcG91dmV6IHNvdXRlbmlyLjwvcD48ZGl2IGNsYXNzPSJjYXJkcyI+PC9kaXY+Jzt2YXIgZ3JpZD1zZWMucXVlcnlTZWxlY3RvcignLmNhcmRzJyk7Wy4uLnMub3B0aW9uc10uZm9yRWFjaCgobyk9PntpZighby52YWx1ZSlyZXR1cm47dmFyIHQ9by50ZXh0Q29udGVudC5yZXBsYWNlKC9eW15BLVphLXrDgC3DvzAtOV0rXHMqLywnJykucmVwbGFjZSgvXHMr4oCULiokLywnJykudHJpbSgpLGc9ZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnYXJ0aWNsZScpO2cuY2xhc3NOYW1lPSdjYXJkIGFjdGl2aXR5LWNhcmQnO2cuaW5uZXJIVE1MPSc8ZGl2IGNsYXNzPSJnYWxsZXJ5Ij48L2Rpdj48ZGl2IGNsYXNzPSJjYXJkYm9keSI+PGgzPjwvaDM+PHA+PC9wPjxidXR0b24gY2xhc3M9ImJ0biIgdHlwZT0iYnV0dG9uIj5DaG9pc2lyIGNldHRlIGNhdGVnb3JpZTwvYnV0dG9uPjwvZGl2PjwvZGl2Pic7Zy5kYXRhc2V0LnRpdGxlPXQ7Zy5xdWVyeVNlbGVjdG9yKCdoMycpLnRleHRDb250ZW50PXQ7dmFyIGdhbD1nLnF1ZXJ5U2VsZWN0b3IoJy5nYWxsZXJ5Jyk7dmFyIGFycj1JW3RdfHxbXTthcnIuZm9yRWFjaCgo c3JjLGkpPT57dmFyIGltPWRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2ltZycpO2ltLnNyYz1zcmM7aWYoaT09PTApIGltLmNsYXNzTmFtZT0nYWN0aXZlJztnYWwuYXBwZW5kQ2hpbGQoaW0pfSk7aWYoYXJyLmxlbmd0aD4xKXt2YXJpZD0nZyc rZ3JpZC5jaGlsZHJlbi5sZW5ndGgrJycnO2dhbC5kYXRhc2V0LmdhbGxlcnk9aWQ7Wyd‹Jyw n›J10uZm9yRWFjaChmdW5jdGlvbih2LGop e3ZhciBiPWRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2J1dHRvbicpO2IuY2xhc3NOYW1lPSdhcnJvdyAnKyhqPyduZXh0JzoncHJldicpO2IudGV4dENvbnRlbnQ9djtiLm9uY2xpY2s9ZnVuY3Rpb24oKXttb3ZlR2FsbGVyeShpZCxqPzE6LTEpfTtnYWwuYXBwZW5kQ2hpbGQoYil9KTt2YXIgZG90cz1kb2N1bWVudC5jcmVhdGVFbGVtZW50KCJkaXYiKTtkb3RzLmNsYXNzTmFtZT0iZG90cyI7YXJyLmZvckVhY2goZnVuY3Rpb24oXyxpaSl7dmFyIGQ9ZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgi c3Bhb iIpO2QuY2xhc3NOYW1lPSJkb3RnIitxaWk/"" :"";ZD0iJztkb3RzLmFwcGVuZENoaWxkKGQpfSk7Z2FsLmFwcGVuZENoaWxkKGRvdHMpfWcucXVlcnlTZWxlY3RvcignLmJ0bicpLm9uY2xpY2s9KCk9PntzLnZhbHVlPW8udmFsdWU7cy5kaXNwYXRjaEV2ZW50KG5ldyBFdmVudCgnY2hhbmdlJykpO2RvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdwcm9tZXNzZScpPy5zY3JvbGxJbnRvVmlldyh7YmVoYXZpb3I6J3Ntb290aCd9KTt9O2dyaWQuYXBwZW5kQ2hpbGQoZyl9KTt2YXIgYT1kb2N1bWVudC5nZXRFbGVtZW50QnlJZCgncHJvbWVzc2UnKTtpZihhKWEucGFyZW50Tm9kZS5pbnNlcnRCZWZvcmUoc2VjLGEubmV4dFNpYmxpbmcpfQpkb2N1bWVudC5hZGRFdmVudExpc3RlbmVyKCdET01Db250ZW50TG9hZGVkJyxidWlsZCk7Cn0pKCk7Cjwvc2NyaXB0PicnJwogICAgICAgIHJlc3BvbnNlLnNldF9kYXRhKGh0bWwucmVwbGFjZSgnPC9ib2R5PicscGF0Y2grJzwvYm9keT4nKSkKICAgIHJldHVybiByZXNwb25zZQo="
-exec(base64.b64decode(_FRONTEND_FIX).decode('utf-8'))
+@app.after_request
+def frontend_fixes(response):
+    if response.content_type and 'text/html' in response.content_type:
+        html = response.get_data(as_text=True)
+        patch = r'''<script>
+(function(){
+  var IMAGES={
+    'Tromsø':['/static/images/tromso.png','/static/images/tromso_01.jpeg','/static/images/tromso_02.jpeg'],
+    'Les îles Lofoten':['/static/images/lofoten.png','/static/images/lofoten_01.jpeg','/static/images/lofoten_02.jpeg'],
+    "S'endormir sous les aurores boréales dans des cabanes au bout du monde":['/static/images/cabin.png','/static/images/cabane_aa_01.jpeg','/static/images/cabane_aa_02.jpeg','/static/images/cabane_aa_03.jpeg']
+  };
+  window.setGallery=function(id,n){var g=document.querySelector('[data-gallery="'+id+'"]');if(!g)return;var a=[].slice.call(g.querySelectorAll('img')),d=[].slice.call(g.querySelectorAll('.dotg'));if(!a.length)return;n=((n%a.length)+a.length)%a.length;a.forEach(function(x,i){x.classList.toggle('active',i===n)});d.forEach(function(x,i){x.classList.toggle('active',i===n)});g.dataset.index=n};
+  window.moveGallery=function(id,n){var g=document.querySelector('[data-gallery="'+id+'"]');setGallery(id,(parseInt(g&&g.dataset.index||0,10)||0)+n)};
+  function buildChoices(){
+    var s=document.querySelector('select[name="activity_id"]');
+    if(!s||document.getElementById('activites'))return;
+    var sec=document.createElement('section');sec.id='activites';
+    sec.innerHTML='<h2 class="sectiontitle">🎁 Choisissez votre souvenir</h2><p class="intro">Chaque catégorie correspond à une partie de l’aventure que vous pouvez soutenir.</p><div class="cards"></div>';
+    var grid=sec.querySelector('.cards');
+    [].slice.call(s.options).forEach(function(o){
+      if(!o.value)return;
+      var title=(o.textContent||'').replace(/^[^A-Za-zÀ-ÿ0-9]+\s*/,'').replace(/\s+—.*$/,'').trim();
+      var card=document.createElement('article');card.className='card activity-card';card.dataset.title=title;
+      card.innerHTML='<div class="gallery"></div><div class="cardbody"><h3></h3><p>Choisissez cette catégorie pour participer à cette partie du voyage.</p><button class="btn" type="button">Choisir cette catégorie</button></div>';
+      card.querySelector('h3').textContent=title;
+      var gallery=card.querySelector('.gallery'),pics=IMAGES[title]||[];
+      pics.forEach(function(src,i){var img=document.createElement('img');img.src=src;if(i===0)img.className='active';gallery.appendChild(img)});
+      if(pics.length>1){
+        var id='choice'+grid.children.length;gallery.dataset.gallery=id;
+        ['‹','›'].forEach(function(txt,i){var b=document.createElement('button');b.className='arrow '+(i?'next':'prev');b.textContent=txt;b.onclick=function(){moveGallery(id,i?1:-1)};gallery.appendChild(b)});
+        var dots=document.createElement('div');dots.className='dots';pics.forEach(function(_,i){var d=document.createElement('span');d.className='dotg'+(i?'':' active');d.onclick=function(){setGallery(id,i)};dots.appendChild(d)});gallery.appendChild(dots);
+      }
+      card.querySelector('.btn').onclick=function(){s.value=o.value;s.dispatchEvent(new Event('change'));var p=document.getElementById('promesse');if(p)p.scrollIntoView({behavior:'smooth'})};
+      grid.appendChild(card);
+    });
+    var anchor=document.getElementById('promesse');if(anchor)anchor.parentNode.insertBefore(sec,anchor.nextSibling);
+  }
+  document.addEventListener('DOMContentLoaded',buildChoices);
+})();
+</script>'''
+        response.set_data(html.replace('</body>',patch+'</body>'))
+    return response
