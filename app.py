@@ -89,19 +89,25 @@ def ensure_schema():
             conn.execute(text('UPDATE pledge SET public_message = FALSE WHERE public_message IS NULL'))
 
 def sync_activities():
-    by_title = {a.title: a for a in Activity.query.all()}
+    """Keep exactly one canonical Activity per category and move all pledges to it.
+    This is deliberately idempotent so a deploy/restart cannot recreate duplicates.
+    """
+    all_activities = Activity.query.order_by(Activity.id).all()
     used_ids = set()
+
     for i, (emoji, title, desc, target) in enumerate(ACTIVITIES):
-        aliases = OLD_ALIASES.get(title, [title])
-        activity = None
-        for alias in aliases:
-            if alias in by_title and by_title[alias].id not in used_ids:
-                activity = by_title[alias]
-                break
+        aliases = OLD_ALIASES.get(title, [])
+        candidates = [a for a in all_activities if a.title == title]
+        if not candidates:
+            candidates = [a for a in all_activities if a.title in aliases]
+        activity = candidates[0] if candidates else None
+
         if activity is None:
             activity = Activity(emoji=emoji, title=title, description=desc, target=target, sort_order=i, active=True)
             db.session.add(activity)
             db.session.flush()
+            all_activities.append(activity)
+
         activity.emoji = emoji
         activity.title = title
         activity.description = desc
@@ -109,15 +115,21 @@ def sync_activities():
         activity.sort_order = i
         activity.active = True
         used_ids.add(activity.id)
-        for alias in aliases:
-            old = by_title.get(alias)
-            if old and old.id != activity.id:
-                Pledge.query.filter_by(activity_id=old.id).update({'activity_id': activity.id})
-                old.active = False
-                used_ids.add(old.id)
+
+        duplicate_ids = [a.id for a in all_activities if a.id != activity.id and (a.title == title or a.title in aliases)]
+        for duplicate_id in duplicate_ids:
+            duplicate = db.session.get(Activity, duplicate_id)
+            if duplicate is None:
+                continue
+            Pledge.query.filter_by(activity_id=duplicate.id).update({'activity_id': activity.id}, synchronize_session=False)
+            db.session.delete(duplicate)
+
+    # Any unrelated legacy activity is retained but hidden; it cannot create a
+    # second visible category and existing pledges remain accessible to admin.
     for activity in Activity.query.all():
         if activity.id not in used_ids:
             activity.active = False
+
     db.session.commit()
 
 with app.app_context():
@@ -144,7 +156,6 @@ def home():
     activities = Activity.query.filter_by(active=True).order_by(Activity.sort_order).all()
     total = total_pledges()
     goal = 1532
-    # Tous les participants apparaissent ici, avec ou sans petit mot.
     messages = Pledge.query.order_by(Pledge.created_at.desc()).all()
     return render_template('index.html', activities=activities, total=total, goal=goal, image_for=lambda a: images_for(a)[0], images_for=images_for, promises=PROMISES, messages=messages)
 
@@ -162,7 +173,7 @@ def admin_login():
 @app.route('/admin/logout')
 def admin_logout():
     session.pop('admin', None)
-    return redirect(url_for('admin'))
+    return redirect(url_for('admin_login'))
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
@@ -171,37 +182,53 @@ def admin():
     if request.method == 'POST':
         action = request.form.get('action')
         pledge_id = request.form.get('pledge_id', type=int)
-        if action == 'delete_pledge' and pledge_id:
+
+        # Accept the current admin form names and the older names so an old
+        # cached page cannot break the action.
+        if action in ('delete_pledge', 'delete') and pledge_id:
             pledge = db.session.get(Pledge, pledge_id)
             if pledge:
                 db.session.delete(pledge)
                 db.session.commit()
                 flash('Promesse supprimée.', 'success')
-        elif action == 'toggle_status' and pledge_id:
+        elif action in ('toggle_status', 'status') and pledge_id:
             pledge = db.session.get(Pledge, pledge_id)
             if pledge:
-                pledge.status = 'confirmé' if pledge.status != 'confirmé' else 'promesse'
+                requested_status = request.form.get('status')
+                if requested_status in ('promesse', 'reçue', 'annulée'):
+                    pledge.status = requested_status
+                else:
+                    pledge.status = 'confirmé' if pledge.status != 'confirmé' else 'promesse'
                 db.session.commit()
                 flash('Statut mis à jour.', 'success')
-        elif action == 'toggle_public' and pledge_id:
+        elif action in ('toggle_public', 'public_message') and pledge_id:
             pledge = db.session.get(Pledge, pledge_id)
             if pledge:
-                pledge.public_message = not pledge.public_message
+                public_value = request.form.get('public')
+                if public_value is not None:
+                    pledge.public_message = public_value == '1'
+                else:
+                    pledge.public_message = not pledge.public_message
                 db.session.commit()
                 flash('Visibilité du message mise à jour.', 'success')
-        elif action == 'edit_activity':
-            activity_id = request.form.get('activity_id', type=int)
+        elif action in ('edit_activity', 'activity'):
+            activity_id = request.form.get('activity_id', type=int) or request.form.get('id', type=int)
             activity = db.session.get(Activity, activity_id)
             if activity:
                 activity.title = request.form.get('title', activity.title)
                 activity.description = request.form.get('description', activity.description)
                 activity.target = request.form.get('target', type=float) or activity.target
+                if 'active' in request.form:
+                    activity.active = True
+                elif action == 'activity':
+                    activity.active = False
                 db.session.commit()
                 flash('Activité mise à jour.', 'success')
         return redirect(url_for('admin'))
+
     pledges = Pledge.query.order_by(Pledge.created_at.desc()).all()
     public_messages = Pledge.query.filter(Pledge.public_message.is_(True), Pledge.message.isnot(None), Pledge.message != '').order_by(Pledge.created_at.desc()).all()
-    activities = Activity.query.order_by(Activity.sort_order).all()
+    activities = Activity.query.order_by(Activity.sort_order, Activity.id).all()
     total = total_pledges()
     return render_template('admin.html', pledges=pledges, public_messages=public_messages, activities=activities, total=total)
 
